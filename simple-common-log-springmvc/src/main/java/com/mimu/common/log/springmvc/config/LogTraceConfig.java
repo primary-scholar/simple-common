@@ -1,7 +1,7 @@
-package com.mimu.common.config;
+package com.mimu.common.log.springmvc.config;
 
-import com.mimu.common.filter.LogTraceFilter;
-import com.mimu.common.interceptor.LogTraceInterceptor;
+import com.mimu.common.log.springmvc.filter.LogTraceFilter;
+import com.mimu.common.log.springmvc.interceptor.LogTraceInterceptor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

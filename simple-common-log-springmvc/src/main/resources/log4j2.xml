@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="ERROR" monitorInterval="30">
     <Properties>
-        <Property name="path">common-log</Property>
+        <Property name="path">common-log-springmvc</Property>
         <Property name="name">server_name</Property>
     </Properties>
     <Appenders>

@@ -1,4 +1,4 @@
-package com.mimu.common.interceptor;
+package com.mimu.common.log.springmvc.interceptor;
 
 
 import com.github.f4b6a3.ulid.UlidCreator;
@@ -24,7 +24,6 @@ import java.util.Objects;
 @Component
 public class LogTraceInterceptor implements HandlerInterceptor {
     private static final Logger IO = LoggerFactory.getLogger("IO");
-
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

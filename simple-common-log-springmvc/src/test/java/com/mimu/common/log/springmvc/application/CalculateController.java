@@ -1,11 +1,11 @@
-package com.mimu.common.application;
+package com.mimu.common.log.springmvc.application;
 
 
 import com.alibaba.fastjson.JSONObject;
-import com.mimu.common.api.AddParam;
-import com.mimu.common.api.CalculateResult;
-import com.mimu.common.api.RpcResult;
-import com.mimu.common.api.RpcResultUtil;
+import com.mimu.common.log.springmvc.api.AddParam;
+import com.mimu.common.log.springmvc.api.CalculateResult;
+import com.mimu.common.log.springmvc.api.RpcResult;
+import com.mimu.common.log.springmvc.api.RpcResultUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestBody;

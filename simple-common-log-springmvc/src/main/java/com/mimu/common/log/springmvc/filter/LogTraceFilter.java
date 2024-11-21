@@ -1,4 +1,5 @@
-package com.mimu.common.filter;
+package com.mimu.common.log.springmvc.filter;
+
 
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
