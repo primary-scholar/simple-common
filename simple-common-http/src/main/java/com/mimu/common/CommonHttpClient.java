@@ -79,6 +79,7 @@ public class CommonHttpClient {
     }
 
     private String requestByPost(String url, String content) throws IOException {
+        IO.info("");
         HttpPost httpPost = new HttpPost(url);
         String result = StringUtils.EMPTY;
         HttpEntity entity = null;

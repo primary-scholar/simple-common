@@ -1,8 +1,9 @@
 package com.mimu.common.log.springmvc.interceptor;
 
 
-import com.github.f4b6a3.ulid.UlidCreator;
+import com.mimu.common.constants.ContextManager;
 import com.mimu.common.constants.NounConstant;
+import com.mimu.common.constants.TraceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
                     new StringBuilder(NounConstant.PROTOCOL_HTTP).append(NounConstant.COLON).append(request.getMethod()).toString());
             MDC.put(NounConstant.URI, request.getRequestURI());
             MDC.put(NounConstant.URL, getFullUrl(request));
-            MDC.put(NounConstant.REQUEST, gerRequest(request));
+            MDC.put(NounConstant.REQUEST, getRequest(request));
             IO.info("");
         } catch (Exception e) {
             IO.warn("LogTraceInterceptor preHandle error", e);
@@ -55,7 +56,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
                     new StringBuilder(NounConstant.PROTOCOL_HTTP).append(NounConstant.COLON).append(request.getMethod()).toString());
             MDC.put(NounConstant.URI, request.getRequestURI());
             MDC.put(NounConstant.URL, getFullUrl(request));
-            MDC.put(NounConstant.REQUEST, gerRequest(request));
+            MDC.put(NounConstant.REQUEST, getRequest(request));
             MDC.put(NounConstant.COST, String.valueOf(cost));
             MDC.put(NounConstant.RESPONSE, getResponse(response));
             IO.info("");
@@ -80,11 +81,12 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     }
 
     private String getOrGenerateTraceId(HttpServletRequest request) {
-        String traceId = request.getHeader(NounConstant.TRACE_ID);
-        if (StringUtils.isEmpty(traceId)) {
-            traceId = UlidCreator.getUlid().toString();
+        TraceContext context = ContextManager.getContext();
+        String requestId = request.getHeader(NounConstant.REQUEST_ID);
+        if (Objects.nonNull(requestId)){
+            context.setTraceId(requestId);
         }
-        return traceId;
+        return context.getTraceId();
     }
 
     private void putStartTimeInRequest(HttpServletRequest request) {
@@ -108,7 +110,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
         return uri;
     }
 
-    private String gerRequest(HttpServletRequest request) throws UnsupportedEncodingException {
+    private String getRequest(HttpServletRequest request) throws UnsupportedEncodingException {
         String param = StringUtils.EMPTY;
         if (request instanceof ContentCachingRequestWrapper) {
             ContentCachingRequestWrapper requestWrapper = (ContentCachingRequestWrapper) request;

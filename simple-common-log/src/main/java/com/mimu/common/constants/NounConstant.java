@@ -14,4 +14,5 @@ public class NounConstant {
     public static final String RESPONSE = "_RESPONSE_";
 
     public static final String PROTOCOL_HTTP = "HTTP";
+    public static final String REQUEST_ID = "_REQUEST_ID_";
 }
