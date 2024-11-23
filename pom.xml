@@ -17,7 +17,6 @@
     <url>http://maven.apache.org</url>
     <modules>
         <module>simple-common-log</module>
-        <module>simple-common-http</module>
         <module>simple-common-dubbo</module>
         <module>simple-common-log-springmvc</module>
         <module>simple-common-log-http</module>
