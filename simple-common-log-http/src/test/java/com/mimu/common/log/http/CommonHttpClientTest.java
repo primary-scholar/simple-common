@@ -1,9 +1,11 @@
-package com.mimu.common;
+package com.mimu.common.log.http;
 
 import org.junit.Before;
 import org.junit.Test;
 
+
 public class CommonHttpClientTest {
+
     private CommonHttpClient client;
 
     @Before
@@ -25,4 +27,5 @@ public class CommonHttpClientTest {
                 "\"description\":\"成法\"}");
         System.out.println(post);
     }
+
 }

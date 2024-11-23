@@ -1,4 +1,4 @@
-package com.mimu.common;
+package com.mimu.common.log.http;
 
 import lombok.Getter;
 import lombok.Setter;
