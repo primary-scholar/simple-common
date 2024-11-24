@@ -1,9 +1,11 @@
 package com.mimu.common.log.springmvc.interceptor;
 
 
-import com.mimu.common.constants.ContextManager;
-import com.mimu.common.constants.NounConstant;
-import com.mimu.common.constants.TraceContext;
+import com.mimu.common.constants.*;
+import com.mimu.common.trace.ContextCarrier;
+import com.mimu.common.trace.ContextManager;
+import com.mimu.common.trace.TraceContext;
+import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,9 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         request.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        ContextCarrier contextCarrier = new ContextCarrier();
+        fillCarrier(request, contextCarrier);
+        TraceSpan entrySpan = ContextManager.createEntrySpan(StringUtils.EMPTY, contextCarrier);
         String traceId = getOrGenerateTraceId(request);
         putStartTimeInRequest(request);
         try {
@@ -49,6 +54,8 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
                            ModelAndView modelAndView) throws Exception {
+        TraceSpan traceSpan = ContextManager.activeSpan();
+        ContextManager.stopSpan();
         try {
             Long startTime = (Long) request.getAttribute(NounConstant.START_TIME);
             long cost = System.currentTimeMillis() - startTime;
@@ -83,7 +90,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     private String getOrGenerateTraceId(HttpServletRequest request) {
         TraceContext context = ContextManager.getContext();
         String requestId = request.getHeader(NounConstant.REQUEST_ID);
-        if (Objects.nonNull(requestId)){
+        if (Objects.nonNull(requestId)) {
             context.setTraceId(requestId);
         }
         return context.getTraceId();
@@ -137,6 +144,10 @@ public class LogTraceInterceptor implements HandlerInterceptor {
             return responseStr;
         }
         return StringUtils.EMPTY;
+    }
+
+    private void fillCarrier(HttpServletRequest request, ContextCarrier carrier) {
+
     }
 
 }

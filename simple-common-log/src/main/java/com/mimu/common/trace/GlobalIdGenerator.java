@@ -1,4 +1,4 @@
-package com.mimu.common.constants;
+package com.mimu.common.trace;
 
 import org.apache.commons.lang3.StringUtils;
 
