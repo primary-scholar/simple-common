@@ -29,20 +29,23 @@ public class ContextManager {
     public static TraceSpan createEntrySpan(String operationName, ContextCarrier carrier) {
         TraceContext context = getOrCreateContext();
         TraceSpan entrySpan = context.createEntrySpan(operationName);
-        if (Objects.nonNull(carrier)) {
+        if (Objects.nonNull(carrier) && carrier.isValid()) {
             context.extract(carrier);
         }
         return entrySpan;
     }
 
     public static TraceSpan createExitSpan(String operationName, ContextCarrier carrier, String peer) {
-        TraceContext context = getOrCreateContext();
+        TraceContext context = get();
+        if (Objects.isNull(context)) {
+            throw new IllegalStateException("context is null");
+        }
         TraceSpan entrySpan = context.createExitSpan(operationName, peer);
         context.inject(carrier);
         return entrySpan;
     }
 
-    public  static TraceSpan activeSpan() {
+    public static TraceSpan activeSpan() {
         return get().activeSpan();
     }
 

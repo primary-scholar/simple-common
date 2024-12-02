@@ -17,15 +17,26 @@ public class TraceSpan {
     protected Long startTime;
     protected Long endTime;
 
-    public TraceSpan(Integer parentId, String spanName, Integer spanId) {
+    public TraceSpan(Integer parentId, String spanName, Integer spanId, Tracer tracer) {
         this.parentId = parentId;
         this.spanName = spanName;
         this.spanId = spanId;
+        this.tracer = tracer;
         this.startTime = System.currentTimeMillis();
     }
 
-    public void start(){
+    public TraceSpan setSpanName(String spanName) {
+        this.spanName = spanName;
+        return this;
+    }
+
+    public Integer getParentId() {
+        return parentId;
+    }
+
+    public TraceSpan start() {
         this.startTime = System.currentTimeMillis();
+        return this;
     }
 
 }
