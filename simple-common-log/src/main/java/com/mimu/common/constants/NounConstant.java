@@ -14,5 +14,9 @@ public class NounConstant {
     public static final String RESPONSE = "_RESPONSE_";
 
     public static final String PROTOCOL_HTTP = "HTTP";
-    public static final String REQUEST_ID = "_REQUEST_ID_";
+    /**
+     * 该字段值是由客户端请求接口时带过来的，约定参数key为requestId
+     */
+    public static final String REQUEST_ID = "requestId";
+    public static final String CID = "cid";
 }

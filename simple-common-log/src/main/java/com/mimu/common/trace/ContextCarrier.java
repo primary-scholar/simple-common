@@ -9,6 +9,16 @@ public class ContextCarrier implements Serializable {
     private String traceId;
     private Integer spanId;
 
+    public CarrierItem items() {
+        CarrierItem.ItemEnum[] values = CarrierItem.ItemEnum.values();
+        CarrierItem tail = new CarrierItem(StringUtils.EMPTY, StringUtils.EMPTY);
+        for (CarrierItem.ItemEnum value : values) {
+            tail = new CarrierItem(value.getItemKey(), StringUtils.EMPTY, tail);
+        }
+        return tail;
+    }
+
+
     public String getTraceId() {
         return traceId;
     }

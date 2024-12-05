@@ -2,6 +2,7 @@ package com.mimu.common.log.springmvc.interceptor;
 
 
 import com.mimu.common.constants.*;
+import com.mimu.common.trace.CarrierItem;
 import com.mimu.common.trace.ContextCarrier;
 import com.mimu.common.trace.ContextManager;
 import com.mimu.common.trace.TraceContext;
@@ -34,13 +35,14 @@ public class LogTraceInterceptor implements HandlerInterceptor {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         ContextCarrier contextCarrier = new ContextCarrier();
         fillCarrier(request, contextCarrier);
-        TraceSpan entrySpan = ContextManager.createEntrySpan(StringUtils.EMPTY, contextCarrier);
+        ContextManager.createEntrySpan(StringUtils.EMPTY, contextCarrier);
         String traceId = getOrGenerateTraceId(request);
         putStartTimeInRequest(request);
         try {
             MDC.put(NounConstant.TRACE_ID, traceId);
             MDC.put(NounConstant.PROTOCOL,
-                    new StringBuilder(NounConstant.PROTOCOL_HTTP).append(NounConstant.COLON).append(request.getMethod()).toString());
+                    new StringBuilder(NounConstant.PROTOCOL_HTTP).append(NounConstant.COLON).append(request.getMethod
+                            ()).toString());
             MDC.put(NounConstant.URI, request.getRequestURI());
             MDC.put(NounConstant.URL, getFullUrl(request));
             MDC.put(NounConstant.REQUEST, getRequest(request));
@@ -60,7 +62,8 @@ public class LogTraceInterceptor implements HandlerInterceptor {
             Long startTime = (Long) request.getAttribute(NounConstant.START_TIME);
             long cost = System.currentTimeMillis() - startTime;
             MDC.put(NounConstant.PROTOCOL,
-                    new StringBuilder(NounConstant.PROTOCOL_HTTP).append(NounConstant.COLON).append(request.getMethod()).toString());
+                    new StringBuilder(NounConstant.PROTOCOL_HTTP).append(NounConstant.COLON).append(request.getMethod
+                            ()).toString());
             MDC.put(NounConstant.URI, request.getRequestURI());
             MDC.put(NounConstant.URL, getFullUrl(request));
             MDC.put(NounConstant.REQUEST, getRequest(request));
@@ -147,7 +150,11 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     }
 
     private void fillCarrier(HttpServletRequest request, ContextCarrier carrier) {
-
+        CarrierItem item = carrier.items();
+        while (item.hasNext()) {
+            item.setValue(request.getHeader(item.getKey()));
+            item = item.next();
+        }
     }
 
 }
