@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CalculateController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CalculateController.class);
 
-    @RequestMapping(value = "/api/first/num/add", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/cal/num/add", method = RequestMethod.GET)
     public RpcResult getMethod(AddParam param) {
         LOGGER.info("get param:{}", JSONObject.toJSONString(param));
         CalculateResult calculateResult = new CalculateResult(param.getFirst() + param.getSecond(),
@@ -26,7 +26,7 @@ public class CalculateController {
     }
 
 
-    @RequestMapping(value = "/api/first/num/multi", method = RequestMethod.POST)
+    @RequestMapping(value = "/api/cal/num/multi", method = RequestMethod.POST)
     public String postMethod(@RequestBody AddParam param) {
         LOGGER.info("post param:{}", JSONObject.toJSONString(param));
         CalculateResult calculateResult = new CalculateResult(param.getFirst() * param.getSecond(),

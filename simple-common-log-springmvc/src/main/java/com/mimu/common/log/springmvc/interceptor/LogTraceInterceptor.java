@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 public class LogTraceInterceptor implements HandlerInterceptor {
@@ -155,6 +155,16 @@ public class LogTraceInterceptor implements HandlerInterceptor {
             item.setValue(request.getHeader(item.getKey()));
             item = item.next();
         }
+       /* while (item.hasNext()){
+            String key = item.getKey();
+            if (NounConstant.TRACE_ID.equals(key)){
+                String value = item.getValue();
+                if (StringUtils.isEmpty(value)){
+                    item.setValue();
+                }
+            }
+        }*/
     }
+
 
 }
