@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class TraceSpan {
+public abstract class TraceSpan implements AbstractSpan {
     private static final Logger IO = LoggerFactory.getLogger("IO");
     protected Tracer tracer;
     protected Integer parentId;

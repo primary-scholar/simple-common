@@ -6,9 +6,8 @@ import java.util.Map;
 
 public class RequestParamResolver {
 
-
-    private void decodeParams(String s) {
-        Map<String, String> params = new LinkedHashMap<String, String>();
+    public static Map<String, Object> decodeParams(String s) {
+        Map<String, Object> params = new LinkedHashMap<String, Object>();
         String name = null;
         int pos = 0; // Beginning of the unprocessed region
         int i;       // End of the unprocessed region
@@ -26,13 +25,9 @@ public class RequestParamResolver {
                     // We haven't seen an `=' so far but moved forward.
                     // Must be a param of the form '&a&' so add it with
                     // an empty value.
-                    if (!addParam(params, decodeComponent(s.substring(pos, i),  Charset.defaultCharset()), "")) {
-                        return;
-                    }
+                    addParam(params, decodeComponent(s.substring(pos, i), Charset.defaultCharset()), null);
                 } else if (name != null) {
-                    if (!addParam(params, name, decodeComponent(s.substring(pos, i),  Charset.defaultCharset()))) {
-                        return;
-                    }
+                    addParam(params, name, decodeComponent(s.substring(pos, i), Charset.defaultCharset()));
                     name = null;
                 }
                 pos = i + 1;
@@ -41,16 +36,18 @@ public class RequestParamResolver {
 
         if (pos != i) {  // Are there characters we haven't dealt with?
             if (name == null) {     // Yes and we haven't seen any `='.
-                addParam(params, decodeComponent(s.substring(pos, i),  Charset.defaultCharset()), "");
+                addParam(params, decodeComponent(s.substring(pos, i), Charset.defaultCharset()), null);
             } else {                // Yes and this must be the last value.
-                addParam(params, name, decodeComponent(s.substring(pos, i),  Charset.defaultCharset()));
+                addParam(params, name, decodeComponent(s.substring(pos, i), Charset.defaultCharset()));
             }
         } else if (name != null) {  // Have we seen a name without value?
             addParam(params, name, "");
         }
+        return params;
     }
 
-    private boolean addParam(Map<String, String> params, String name, String value) {
+    private static boolean addParam(Map<String, Object> params, String name, Object value) {
+        params.put(name, value);
         return true;
     }
 
@@ -80,8 +77,7 @@ public class RequestParamResolver {
                     break;
                 case '%':
                     if (i == size - 1) {
-                        throw new IllegalArgumentException("unterminated escape"
-                                + " sequence at end of string: " + s);
+                        throw new IllegalArgumentException("unterminated escape" + " sequence at end of string: " + s);
                     }
                     c = s.charAt(++i);
                     if (c == '%') {
@@ -89,16 +85,12 @@ public class RequestParamResolver {
                         break;
                     }
                     if (i == size - 1) {
-                        throw new IllegalArgumentException("partial escape"
-                                + " sequence at end of string: " + s);
+                        throw new IllegalArgumentException("partial escape" + " sequence at end of string: " + s);
                     }
                     c = decodeHexNibble(c);
                     final char c2 = decodeHexNibble(s.charAt(++i));
                     if (c == Character.MAX_VALUE || c2 == Character.MAX_VALUE) {
-                        throw new IllegalArgumentException(
-                                "invalid escape sequence `%" + s.charAt(i - 1)
-                                        + s.charAt(i) + "' at index " + (i - 2)
-                                        + " of: " + s);
+                        throw new IllegalArgumentException("invalid escape sequence `%" + s.charAt(i - 1) + s.charAt(i) + "' at index " + (i - 2) + " of: " + s);
                     }
                     c = (char) (c * 16 + c2);
                     // Fall through.

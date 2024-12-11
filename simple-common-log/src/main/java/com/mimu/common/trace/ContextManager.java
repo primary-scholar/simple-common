@@ -51,8 +51,13 @@ public class ContextManager {
 
     public static void stopSpan() {
         TraceContext traceContext = get();
-        traceContext.stopSpan(traceContext.activeSpan());
-        CONTEXT.remove();
+        stopSpan(traceContext.activeSpan(), traceContext);
+    }
+
+    private static void stopSpan(TraceSpan span, TraceContext context) {
+        if (context.stopSpan(span)) {
+            CONTEXT.remove();
+        }
     }
 
 }

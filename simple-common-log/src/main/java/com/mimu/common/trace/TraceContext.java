@@ -1,6 +1,7 @@
 package com.mimu.common.trace;
 
 import com.mimu.common.trace.span.EntrySpan;
+import com.mimu.common.trace.span.ExitSpan;
 import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -30,15 +31,17 @@ public class TraceContext {
     public TraceSpan createEntrySpan(String operationName) {
         TraceSpan entrySpan;
         TraceSpan parentSpan = peek();
-        Integer parentSpanId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE : parentSpan.getParentId();
-        if (Objects.isNull(parentSpan)) {
-            entrySpan = new EntrySpan(parentSpanId++, operationName, spanIdGenerator++, tracer);
-            entrySpan.start();
-            return push(entrySpan);
-        } else {
+        Tracer currentTracer = this.tracer;
+        if (Objects.nonNull(parentSpan) && parentSpan.isEntry()) {
             parentSpan.setSpanName(operationName);
             entrySpan = parentSpan;
             return entrySpan.start();
+        } else {
+            Integer parentSpanId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
+                    parentSpan.getParentId();
+            entrySpan = new EntrySpan(parentSpanId++, operationName, spanIdGenerator++, currentTracer);
+            entrySpan.start();
+            return push(entrySpan);
         }
     }
 
@@ -47,11 +50,23 @@ public class TraceContext {
     }
 
     public TraceSpan createExitSpan(String operationName, String peer) {
-        return null;
+        TraceSpan exitSpan;
+        TraceSpan parentSpan = peek();
+        Tracer currentTracer = this.tracer;
+        if (Objects.nonNull(parentSpan) && parentSpan.isExit()) {
+            exitSpan = parentSpan;
+        } else {
+            Integer parentSpanId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
+                    parentSpan.getParentId();
+            exitSpan = new ExitSpan(parentSpanId++, operationName, spanIdGenerator++, currentTracer);
+            return push(exitSpan);
+        }
+        exitSpan.start();
+        return exitSpan;
     }
 
     public void inject(ContextCarrier carrier) {
-
+        carrier.setTraceId(this.tracer.getTraceId());
     }
 
     public TraceSpan activeSpan() {
@@ -62,13 +77,21 @@ public class TraceContext {
         return span;
     }
 
-    public void stopSpan(TraceSpan span) {
-
+    public Boolean stopSpan(TraceSpan span) {
+        TraceSpan lastSpan = peek();
+        if (lastSpan == span) {
+            pop();
+        }
+        return activeSpans.isEmpty();
     }
 
     private TraceSpan push(TraceSpan span) {
         activeSpans.add(span);
         return span;
+    }
+
+    private TraceSpan pop() {
+        return activeSpans.remove(activeSpans.size() - 1);
     }
 
     private TraceSpan peek() {

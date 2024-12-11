@@ -1,21 +1,25 @@
 package com.mimu.common.trace;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContextCarrier implements Serializable {
     private String traceId;
     private Integer spanId;
+    private List<CarrierItem> itemList;
 
-    public CarrierItem items() {
+    public List<CarrierItem> items() {
+        itemList = new ArrayList<>();
         CarrierItem.ItemEnum[] values = CarrierItem.ItemEnum.values();
-        CarrierItem tail = new CarrierItem(StringUtils.EMPTY, StringUtils.EMPTY);
         for (CarrierItem.ItemEnum value : values) {
-            tail = new CarrierItem(value.getItemKey(), StringUtils.EMPTY, tail);
+            CarrierItem item = new CarrierItem();
+            item.setKey(value.getItemKey());
+            itemList.add(item);
         }
-        return tail;
+        return itemList;
     }
 
 
@@ -36,6 +40,6 @@ public class ContextCarrier implements Serializable {
     }
 
     public Boolean isValid() {
-        return StringUtils.isNotBlank(traceId) && spanId > NumberUtils.INTEGER_MINUS_ONE;
+        return StringUtils.isNotBlank(traceId);
     }
 }

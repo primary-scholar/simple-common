@@ -1,6 +1,7 @@
 package com.mimu.common.log.springmvc.interceptor;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.mimu.common.constants.*;
 import com.mimu.common.trace.CarrierItem;
 import com.mimu.common.trace.ContextCarrier;
@@ -10,7 +11,6 @@ import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -31,24 +31,13 @@ public class LogTraceInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        request.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        ContextCarrier contextCarrier = new ContextCarrier();
-        fillCarrier(request, contextCarrier);
-        ContextManager.createEntrySpan(StringUtils.EMPTY, contextCarrier);
-        String traceId = getOrGenerateTraceId(request);
-        putStartTimeInRequest(request);
         try {
-            MDC.put(NounConstant.TRACE_ID, traceId);
-            MDC.put(NounConstant.PROTOCOL,
-                    new StringBuilder(NounConstant.PROTOCOL_HTTP).append(NounConstant.COLON).append(request.getMethod
-                            ()).toString());
-            MDC.put(NounConstant.URI, request.getRequestURI());
-            MDC.put(NounConstant.URL, getFullUrl(request));
-            MDC.put(NounConstant.REQUEST, getRequest(request));
-            IO.info("");
-        } catch (Exception e) {
-            IO.warn("LogTraceInterceptor preHandle error", e);
+            request.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            ContextCarrier contextCarrier = new ContextCarrier();
+            fillCarrier(request, contextCarrier);
+            ContextManager.createEntrySpan(StringUtils.EMPTY, contextCarrier);
+        } catch (UnsupportedEncodingException e) {
         }
         return Boolean.TRUE;
     }
@@ -56,31 +45,10 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
                            ModelAndView modelAndView) throws Exception {
-        TraceSpan traceSpan = ContextManager.activeSpan();
-        ContextManager.stopSpan();
         try {
-            Long startTime = (Long) request.getAttribute(NounConstant.START_TIME);
-            long cost = System.currentTimeMillis() - startTime;
-            MDC.put(NounConstant.PROTOCOL,
-                    new StringBuilder(NounConstant.PROTOCOL_HTTP).append(NounConstant.COLON).append(request.getMethod
-                            ()).toString());
-            MDC.put(NounConstant.URI, request.getRequestURI());
-            MDC.put(NounConstant.URL, getFullUrl(request));
-            MDC.put(NounConstant.REQUEST, getRequest(request));
-            MDC.put(NounConstant.COST, String.valueOf(cost));
-            MDC.put(NounConstant.RESPONSE, getResponse(response));
-            IO.info("");
+            TraceSpan traceSpan = ContextManager.activeSpan();
+            ContextManager.stopSpan();
         } catch (Exception e) {
-            IO.warn("LogTraceInterceptor postHandle error", e);
-        } finally {
-            MDC.remove(NounConstant.TRACE_ID);
-            MDC.remove(NounConstant.COST);
-            MDC.remove(NounConstant.PROTOCOL);
-            MDC.remove(NounConstant.URI);
-            MDC.remove(NounConstant.URL);
-            MDC.remove(NounConstant.REQUEST);
-            MDC.remove(NounConstant.RESPONSE);
-            IO.info("");
         }
     }
 
@@ -120,6 +88,22 @@ public class LogTraceInterceptor implements HandlerInterceptor {
         return uri;
     }
 
+    private Map<String, Object> getParameter(HttpServletRequest request) {
+        String requestStr;
+        try {
+            requestStr = getRequest(request);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        if (HttpMethod.GET.equals(HttpMethod.resolve(request.getMethod()))) {
+            return RequestParamResolver.decodeParams(requestStr);
+        }
+        if (HttpMethod.POST.equals(HttpMethod.resolve(request.getMethod()))) {
+            return JSONObject.parseObject(requestStr);
+        }
+        return Collections.emptyMap();
+    }
+
     private String getRequest(HttpServletRequest request) throws UnsupportedEncodingException {
         String param = StringUtils.EMPTY;
         if (request instanceof ContentCachingRequestWrapper) {
@@ -150,20 +134,23 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     }
 
     private void fillCarrier(HttpServletRequest request, ContextCarrier carrier) {
-        CarrierItem item = carrier.items();
-        while (item.hasNext()) {
+        List<CarrierItem> itemList = carrier.items();
+        for (CarrierItem item : itemList) {
             item.setValue(request.getHeader(item.getKey()));
-            item = item.next();
         }
-       /* while (item.hasNext()){
-            String key = item.getKey();
-            if (NounConstant.TRACE_ID.equals(key)){
+        for (CarrierItem item : itemList) {
+            if (NounConstant.TRACE_ID.equals(item.getKey())) {
                 String value = item.getValue();
-                if (StringUtils.isEmpty(value)){
-                    item.setValue();
+                if (StringUtils.isEmpty(value)) {
+                    Map<String, Object> parameter = getParameter(request);
+                    String requestId = parameter.getOrDefault(NounConstant.REQUEST_ID, StringUtils.EMPTY).toString();
+                    item.setValue(requestId);
+                    if (StringUtils.isEmpty(carrier.getTraceId())) {
+                        carrier.setTraceId(requestId);
+                    }
                 }
             }
-        }*/
+        }
     }
 
 

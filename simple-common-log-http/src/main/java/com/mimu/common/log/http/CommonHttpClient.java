@@ -2,6 +2,7 @@ package com.mimu.common.log.http;
 
 import com.mimu.common.trace.ContextCarrier;
 import com.mimu.common.trace.ContextManager;
+import com.mimu.common.trace.span.TraceSpan;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -63,18 +64,19 @@ public class CommonHttpClient {
     }
 
     private String requestByGet(String url) throws IOException {
-        ContextCarrier contextCarrier = new ContextCarrier();
-        ContextManager.createExitSpan(StringUtils.EMPTY,contextCarrier,StringUtils.EMPTY);
-        IO.info("");
         HttpGet httpGet = new HttpGet(url);
         HttpEntity entity = null;
         String result = StringUtils.EMPTY;
         try {
+            ContextCarrier contextCarrier = new ContextCarrier();
+            ContextManager.createExitSpan(StringUtils.EMPTY, contextCarrier, StringUtils.EMPTY);
             CloseableHttpResponse response = httpClient.execute(httpGet);
             entity = response.getEntity();
             if (Objects.nonNull(entity)) {
                 result = EntityUtils.toString(entity);
             }
+            TraceSpan traceSpan = ContextManager.activeSpan();
+            ContextManager.stopSpan();
         } catch (IOException e) {
         } finally {
             EntityUtils.consume(entity);
