@@ -117,24 +117,20 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     }
 
     private void fillCarrier(HttpServletRequest request, ContextCarrier carrier) {
-        List<CarrierItem> itemList = carrier.items();
-        for (CarrierItem item : itemList) {
-            item.setValue(request.getHeader(item.getKey()));
-        }
-        for (CarrierItem item : itemList) {
-            if (NounConstant.TRACE_ID.equals(item.getKey())) {
-                String value = item.getValue();
-                if (StringUtils.isEmpty(value)) {
-                    Map<String, Object> parameter = getParameter(request);
-                    String requestId = parameter.getOrDefault(NounConstant.REQUEST_ID, StringUtils.EMPTY).toString();
-                    item.setValue(requestId);
-                    if (StringUtils.isEmpty(carrier.getTraceId())) {
-                        carrier.setTraceId(requestId);
-                    }
-                }
+        Map<String, String> tags = carrier.tags();
+        tags.replaceAll((k, v) -> request.getHeader(k));
+        if (StringUtils.isEmpty(carrier.getTraceId())) {
+            String traceId = tags.get(NounConstant.TRACE_ID);
+            if (StringUtils.isEmpty(traceId)) {
+                Map<String, Object> parameter = getParameter(request);
+                traceId = parameter.getOrDefault(NounConstant.REQUEST_ID, StringUtils.EMPTY).toString();
             }
+            carrier.setTraceId(traceId);
+        }
+        if (Objects.isNull(carrier.getSpanId())) {
+            carrier.setSpanId(Integer.valueOf(tags.getOrDefault(NounConstant.SPAN_ID,
+                    String.valueOf(ContextCarrier.DEFAULT_SPAN_ID))));
         }
     }
-
 
 }

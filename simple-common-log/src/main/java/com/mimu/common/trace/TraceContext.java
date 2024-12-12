@@ -70,8 +70,9 @@ public class TraceContext {
         return exitSpan;
     }
 
-    public void inject(ContextCarrier carrier) {
+    public void inject(ContextCarrier carrier, TraceSpan span) {
         carrier.setTraceId(this.tracer.getTraceId());
+        carrier.setSpanId(span.getSpanId());
     }
 
     public TraceSpan activeSpan() {

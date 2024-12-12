@@ -1,33 +1,21 @@
 package com.mimu.common.trace;
 
-import org.apache.commons.collections4.MapUtils;
+import com.mimu.common.constants.NounConstant;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.Serializable;
 import java.util.*;
 
 public class ContextCarrier implements Serializable {
+    public static final Integer DEFAULT_SPAN_ID = NumberUtils.INTEGER_ZERO;
     private String traceId;
     private Integer spanId;
-    private List<CarrierItem> itemList;
-    private Map<String, String> tagValueMap;
+    private Map<String, String> tagValueMap = new HashMap<>();
 
-    public List<CarrierItem> items() {
-        itemList = new ArrayList<>();
-        CarrierItem.ItemEnum[] values = CarrierItem.ItemEnum.values();
-        for (CarrierItem.ItemEnum value : values) {
-            CarrierItem item = new CarrierItem();
-            item.setKey(value.getItemKey());
-            itemList.add(item);
-        }
-        return itemList;
-    }
-
-    public Iterator<Map.Entry<String, String>> iterator() {
-        if (MapUtils.isEmpty(tagValueMap)) {
-
-        }
-        return tagValueMap.entrySet().iterator();
+    public Map<String, String> tags() {
+        tagValueMap.put(NounConstant.TRACE_ID, StringUtils.EMPTY);
+        return tagValueMap;
     }
 
 
@@ -37,6 +25,7 @@ public class ContextCarrier implements Serializable {
 
     public void setTraceId(String traceId) {
         this.traceId = traceId;
+        this.tagValueMap.put(NounConstant.TRACE_ID, traceId);
     }
 
     public Integer getSpanId() {
@@ -45,9 +34,10 @@ public class ContextCarrier implements Serializable {
 
     public void setSpanId(Integer spanId) {
         this.spanId = spanId;
+        this.tagValueMap.put(NounConstant.SPAN_ID, String.valueOf(spanId));
     }
 
     public Boolean isValid() {
-        return StringUtils.isNotBlank(traceId);
+        return StringUtils.isNotBlank(traceId) && Objects.nonNull(spanId);
     }
 }

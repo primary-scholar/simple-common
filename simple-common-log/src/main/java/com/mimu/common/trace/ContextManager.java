@@ -37,7 +37,7 @@ public class ContextManager {
             throw new IllegalStateException("context is null");
         }
         TraceSpan entrySpan = context.createExitSpan(operationName, peer);
-        context.inject(carrier);
+        context.inject(carrier, entrySpan);
         return entrySpan;
     }
 
