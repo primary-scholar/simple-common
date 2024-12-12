@@ -3,12 +3,11 @@ package com.mimu.common.log.springmvc.interceptor;
 
 import com.alibaba.fastjson.JSONObject;
 import com.mimu.common.constants.*;
-import com.mimu.common.trace.CarrierItem;
 import com.mimu.common.trace.ContextCarrier;
 import com.mimu.common.trace.ContextManager;
-import com.mimu.common.trace.TraceContext;
 import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -128,12 +127,18 @@ public class LogTraceInterceptor implements HandlerInterceptor {
             carrier.setTraceId(traceId);
         }
         if (Objects.isNull(carrier.getParentSpanId())) {
-            carrier.setParentSpanId(Integer.valueOf(tags.getOrDefault(NounConstant.PARENT_SPAN_ID,
-                    String.valueOf(ContextCarrier.DEFAULT_PARENT_SPAN_ID))));
+            String parentSpanId = tags.get(NounConstant.PARENT_SPAN_ID);
+            if (StringUtils.isEmpty(parentSpanId)) {
+                parentSpanId = String.valueOf(ContextCarrier.DEFAULT_PARENT_SPAN_ID);
+            }
+            carrier.setParentSpanId(NumberUtils.toInt(parentSpanId, ContextCarrier.DEFAULT_PARENT_SPAN_ID));
         }
         if (Objects.isNull(carrier.getSpanId())) {
-            carrier.setSpanId(Integer.valueOf(tags.getOrDefault(NounConstant.SPAN_ID,
-                    String.valueOf(ContextCarrier.DEFAULT_SPAN_ID))));
+            String spanId = tags.get(NounConstant.SPAN_ID);
+            if (StringUtils.isEmpty(spanId)) {
+                spanId = String.valueOf(ContextCarrier.DEFAULT_SPAN_ID);
+            }
+            carrier.setSpanId(NumberUtils.toInt(spanId, ContextCarrier.DEFAULT_SPAN_ID));
         }
     }
 
