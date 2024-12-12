@@ -5,7 +5,7 @@ public class NounConstant {
     public static final String COLON = ":";
 
     public static final String TRACE_ID = "_TRACE_ID_";
-    public static final String PARENT_ID = "_PARENT_ID_";
+    public static final String PARENT_SPAN_ID = "_PARENT_SPAN_ID_";
     public static final String SPAN_ID = "_SPAN_ID_";
     public static final String START_TIME = "_START_TIME_";
     public static final String COST = "_COST_";

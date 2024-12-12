@@ -11,7 +11,7 @@ import java.util.Objects;
 @Getter
 public class SpanLogInfo implements Serializable {
     private String traceId;
-    private Integer parentId;
+    private Integer parentSpanId;
     private Integer spanId;
     private Long cid;
     private String remoteInterface;
@@ -24,7 +24,7 @@ public class SpanLogInfo implements Serializable {
             return;
         }
         this.traceId = span.getTracer().getTraceId();
-        this.parentId = span.getParentId();
+        this.parentSpanId = span.getParentSpanId();
         this.spanId = span.getSpanId();
         this.remoteInterface = null;
         this.cost = Math.toIntExact(span.getEndTime() - span.getStartTime());

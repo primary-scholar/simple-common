@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -34,9 +35,7 @@ public class CommonHttpClient {
     public CommonHttpClient(PoolingHttpConnectionManagerConfig connectionManagerConfig) {
         this.connectionManager = initPoolingConnectionManager(connectionManagerConfig);
         this.httpClient =
-                HttpClients.custom().evictExpiredConnections()
-                        .evictIdleConnections(connectionManager.getValidateAfterInactivity(), TimeUnit.MILLISECONDS)
-                        .setConnectionManager(connectionManager).build();
+                HttpClients.custom().evictExpiredConnections().evictIdleConnections(connectionManager.getValidateAfterInactivity(), TimeUnit.MILLISECONDS).setConnectionManager(connectionManager).build();
     }
 
     public PoolingHttpClientConnectionManager initPoolingConnectionManager(PoolingHttpConnectionManagerConfig builder) {
@@ -70,6 +69,7 @@ public class CommonHttpClient {
         try {
             ContextCarrier contextCarrier = new ContextCarrier();
             ContextManager.createExitSpan(StringUtils.EMPTY, contextCarrier, StringUtils.EMPTY);
+            extractCarrier(httpGet, contextCarrier);
             CloseableHttpResponse response = httpClient.execute(httpGet);
             entity = response.getEntity();
             if (Objects.nonNull(entity)) {
@@ -111,5 +111,12 @@ public class CommonHttpClient {
         private Integer connectionTimeOut = 3000;
         private Integer connectionRequestTimeout = 3000;
         private Integer socketTimeout = 3000;
+    }
+
+    private void extractCarrier(HttpGet httpGet, ContextCarrier carrier) {
+        Map<String, String> tags = carrier.tags();
+        for (Map.Entry<String, String> next : tags.entrySet()) {
+            httpGet.setHeader(next.getKey(), next.getValue());
+        }
     }
 }

@@ -43,7 +43,7 @@ public class TraceContext {
             return entrySpan.start();
         } else {
             Integer parentSpanId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
-                    parentSpan.getParentId();
+                    parentSpan.getParentSpanId();
             entrySpan = new EntrySpan(parentSpanId++, operationName, spanIdGenerator++, currentTracer);
             entrySpan.start();
             return push(entrySpan);
@@ -62,7 +62,7 @@ public class TraceContext {
             exitSpan = parentSpan;
         } else {
             Integer parentSpanId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
-                    parentSpan.getParentId();
+                    parentSpan.getParentSpanId();
             exitSpan = new ExitSpan(parentSpanId++, operationName, spanIdGenerator++, currentTracer);
             return push(exitSpan);
         }
@@ -72,6 +72,7 @@ public class TraceContext {
 
     public void inject(ContextCarrier carrier, TraceSpan span) {
         carrier.setTraceId(this.tracer.getTraceId());
+        carrier.setParentSpanId(span.getParentSpanId());
         carrier.setSpanId(span.getSpanId());
     }
 
@@ -112,7 +113,7 @@ public class TraceContext {
         span.stop();
         SpanLogInfo spanLogInfo = new SpanLogInfo(span);
         MDC.put(NounConstant.TRACE_ID, spanLogInfo.getTraceId());
-        MDC.put(NounConstant.PARENT_ID, String.valueOf(spanLogInfo.getParentId()));
+        MDC.put(NounConstant.PARENT_SPAN_ID, String.valueOf(spanLogInfo.getParentSpanId()));
         MDC.put(NounConstant.SPAN_ID, String.valueOf(spanLogInfo.getSpanId()));
         MDC.put(NounConstant.URI, spanLogInfo.getRemoteInterface());
         MDC.put(NounConstant.COST, String.valueOf(spanLogInfo.getCost()));
@@ -120,7 +121,7 @@ public class TraceContext {
         MDC.put(NounConstant.RESPONSE, spanLogInfo.getResponse());
         IO.info("");
         MDC.remove(NounConstant.TRACE_ID);
-        MDC.remove(NounConstant.PARENT_ID);
+        MDC.remove(NounConstant.PARENT_SPAN_ID);
         MDC.remove(NounConstant.SPAN_ID);
         MDC.remove(NounConstant.URI);
         MDC.remove(NounConstant.COST);

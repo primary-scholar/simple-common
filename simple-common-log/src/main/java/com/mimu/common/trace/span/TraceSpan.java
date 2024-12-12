@@ -10,15 +10,15 @@ import java.util.List;
 public abstract class TraceSpan implements AbstractSpan {
     private static final Logger IO = LoggerFactory.getLogger("IO");
     protected Tracer tracer;
-    protected Integer parentId;
+    protected Integer parentSpanId;
     protected Integer spanId;
     protected String spanName;
     protected List<TraceSpan> refs;
     protected Long startTime;
     protected Long endTime;
 
-    public TraceSpan(Integer parentId, String spanName, Integer spanId, Tracer tracer) {
-        this.parentId = parentId;
+    public TraceSpan(Integer parentSpanId, String spanName, Integer spanId, Tracer tracer) {
+        this.parentSpanId = parentSpanId;
         this.spanName = spanName;
         this.spanId = spanId;
         this.tracer = tracer;
@@ -34,8 +34,8 @@ public abstract class TraceSpan implements AbstractSpan {
         return tracer;
     }
 
-    public Integer getParentId() {
-        return parentId;
+    public Integer getParentSpanId() {
+        return parentSpanId;
     }
 
     public Integer getSpanId() {

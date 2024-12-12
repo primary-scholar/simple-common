@@ -8,13 +8,21 @@ import java.io.Serializable;
 import java.util.*;
 
 public class ContextCarrier implements Serializable {
+    public static final Integer DEFAULT_PARENT_SPAN_ID = NumberUtils.INTEGER_MINUS_ONE;
     public static final Integer DEFAULT_SPAN_ID = NumberUtils.INTEGER_ZERO;
     private String traceId;
+    private Integer parentSpanId;
     private Integer spanId;
     private Map<String, String> tagValueMap = new HashMap<>();
 
-    public Map<String, String> tags() {
+    public Map<String, String> emptyTags() {
         tagValueMap.put(NounConstant.TRACE_ID, StringUtils.EMPTY);
+        tagValueMap.put(NounConstant.PARENT_SPAN_ID, StringUtils.EMPTY);
+        tagValueMap.put(NounConstant.SPAN_ID, StringUtils.EMPTY);
+        return tagValueMap;
+    }
+
+    public Map<String, String> tags() {
         return tagValueMap;
     }
 
@@ -37,7 +45,16 @@ public class ContextCarrier implements Serializable {
         this.tagValueMap.put(NounConstant.SPAN_ID, String.valueOf(spanId));
     }
 
+    public Integer getParentSpanId() {
+        return parentSpanId;
+    }
+
+    public void setParentSpanId(Integer parentSpanId) {
+        this.parentSpanId = parentSpanId;
+        this.tagValueMap.put(NounConstant.PARENT_SPAN_ID, String.valueOf(parentSpanId));
+    }
+
     public Boolean isValid() {
-        return StringUtils.isNotBlank(traceId) && Objects.nonNull(spanId);
+        return StringUtils.isNotBlank(traceId) && Objects.nonNull(parentSpanId) && Objects.nonNull(spanId);
     }
 }

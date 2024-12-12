@@ -117,7 +117,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     }
 
     private void fillCarrier(HttpServletRequest request, ContextCarrier carrier) {
-        Map<String, String> tags = carrier.tags();
+        Map<String, String> tags = carrier.emptyTags();
         tags.replaceAll((k, v) -> request.getHeader(k));
         if (StringUtils.isEmpty(carrier.getTraceId())) {
             String traceId = tags.get(NounConstant.TRACE_ID);
@@ -126,6 +126,10 @@ public class LogTraceInterceptor implements HandlerInterceptor {
                 traceId = parameter.getOrDefault(NounConstant.REQUEST_ID, StringUtils.EMPTY).toString();
             }
             carrier.setTraceId(traceId);
+        }
+        if (Objects.isNull(carrier.getParentSpanId())) {
+            carrier.setParentSpanId(Integer.valueOf(tags.getOrDefault(NounConstant.PARENT_SPAN_ID,
+                    String.valueOf(ContextCarrier.DEFAULT_PARENT_SPAN_ID))));
         }
         if (Objects.isNull(carrier.getSpanId())) {
             carrier.setSpanId(Integer.valueOf(tags.getOrDefault(NounConstant.SPAN_ID,
