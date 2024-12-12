@@ -58,23 +58,6 @@ public class LogTraceInterceptor implements HandlerInterceptor {
 
     }
 
-    private String getOrGenerateTraceId(HttpServletRequest request) {
-        TraceContext context = ContextManager.getContext();
-        String requestId = request.getHeader(NounConstant.REQUEST_ID);
-        if (Objects.nonNull(requestId)) {
-            context.setTraceId(requestId);
-        }
-        return context.getTraceId();
-    }
-
-    private void putStartTimeInRequest(HttpServletRequest request) {
-        Object startTimeObj = request.getAttribute(NounConstant.START_TIME);
-        if (Objects.isNull(startTimeObj)) {
-            startTimeObj = System.currentTimeMillis();
-        }
-        request.setAttribute(NounConstant.START_TIME, startTimeObj);
-    }
-
     private String getFullUrl(HttpServletRequest request) throws UnsupportedEncodingException {
         String uri = request.getRequestURI();
         if (HttpMethod.GET.equals(HttpMethod.resolve(request.getMethod()))) {

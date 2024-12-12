@@ -2,7 +2,9 @@ package com.mimu.common.trace;
 
 import com.mimu.common.trace.span.TraceSpan;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class Tracer {
@@ -19,6 +21,15 @@ public class Tracer {
 
     void setTraceId(String id) {
         this.traceId = id;
+    }
+
+    public TraceSpan addSpan(TraceSpan span) {
+        if (Objects.isNull(spans)) {
+            spans = new LinkedList<>();
+        } else {
+            spans.add(span);
+        }
+        return span;
     }
 
 }

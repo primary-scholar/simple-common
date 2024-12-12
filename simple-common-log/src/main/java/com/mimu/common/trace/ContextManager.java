@@ -18,10 +18,6 @@ public class ContextManager {
         return context;
     }
 
-    public static TraceContext getContext() {
-        return getOrCreateContext();
-    }
-
     public static TraceContext get() {
         return CONTEXT.get();
     }

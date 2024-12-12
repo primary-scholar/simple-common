@@ -30,8 +30,16 @@ public abstract class TraceSpan implements AbstractSpan {
         return this;
     }
 
+    public Tracer getTracer() {
+        return tracer;
+    }
+
     public Integer getParentId() {
         return parentId;
+    }
+
+    public Integer getSpanId() {
+        return spanId;
     }
 
     public TraceSpan start() {

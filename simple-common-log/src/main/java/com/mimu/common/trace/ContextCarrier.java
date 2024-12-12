@@ -1,15 +1,16 @@
 package com.mimu.common.trace;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ContextCarrier implements Serializable {
     private String traceId;
     private Integer spanId;
     private List<CarrierItem> itemList;
+    private Map<String, String> tagValueMap;
 
     public List<CarrierItem> items() {
         itemList = new ArrayList<>();
@@ -20,6 +21,13 @@ public class ContextCarrier implements Serializable {
             itemList.add(item);
         }
         return itemList;
+    }
+
+    public Iterator<Map.Entry<String, String>> iterator() {
+        if (MapUtils.isEmpty(tagValueMap)) {
+
+        }
+        return tagValueMap.entrySet().iterator();
     }
 
 

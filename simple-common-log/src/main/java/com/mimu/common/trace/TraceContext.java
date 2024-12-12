@@ -1,16 +1,21 @@
 package com.mimu.common.trace;
 
+import com.mimu.common.SpanLogInfo;
+import com.mimu.common.constants.NounConstant;
 import com.mimu.common.trace.span.EntrySpan;
 import com.mimu.common.trace.span.ExitSpan;
 import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 public class TraceContext {
-
+    private static final Logger IO = LoggerFactory.getLogger("IO");
     private Tracer tracer;
     private Integer spanIdGenerator;
     private List<TraceSpan> activeSpans = new LinkedList<>();
@@ -82,6 +87,7 @@ public class TraceContext {
         if (lastSpan == span) {
             pop();
         }
+        finish(lastSpan);
         return activeSpans.isEmpty();
     }
 
@@ -100,4 +106,24 @@ public class TraceContext {
         }
         return activeSpans.get(activeSpans.size() - 1);
     }
+
+    private void finish(TraceSpan span) {
+        SpanLogInfo spanLogInfo = new SpanLogInfo(span);
+        MDC.put(NounConstant.TRACE_ID, spanLogInfo.getTraceId());
+        MDC.put(NounConstant.PARENT_ID, String.valueOf(spanLogInfo.getParentId()));
+        MDC.put(NounConstant.SPAN_ID, String.valueOf(spanLogInfo.getSpanId()));
+        MDC.put(NounConstant.URI, spanLogInfo.getRemoteInterface());
+        MDC.put(NounConstant.COST, String.valueOf(spanLogInfo.getCost()));
+        MDC.put(NounConstant.REQUEST, spanLogInfo.getRequest());
+        MDC.put(NounConstant.RESPONSE, spanLogInfo.getResponse());
+        IO.info("");
+        MDC.remove(NounConstant.TRACE_ID);
+        MDC.remove(NounConstant.PARENT_ID);
+        MDC.remove(NounConstant.SPAN_ID);
+        MDC.remove(NounConstant.URI);
+        MDC.remove(NounConstant.COST);
+        MDC.remove(NounConstant.REQUEST);
+        MDC.remove(NounConstant.RESPONSE);
+    }
+
 }
