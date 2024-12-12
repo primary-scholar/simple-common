@@ -27,5 +27,6 @@ public class SpanLogInfo implements Serializable {
         this.parentId = span.getParentId();
         this.spanId = span.getSpanId();
         this.remoteInterface = null;
+        this.cost = Math.toIntExact(span.getEndTime() - span.getStartTime());
     }
 }

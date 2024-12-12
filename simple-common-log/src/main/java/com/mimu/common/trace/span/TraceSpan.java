@@ -47,4 +47,16 @@ public abstract class TraceSpan implements AbstractSpan {
         return this;
     }
 
+    public TraceSpan stop() {
+        this.endTime = System.currentTimeMillis();
+        return this;
+    }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
+    public Long getEndTime() {
+        return endTime;
+    }
 }

@@ -108,6 +108,7 @@ public class TraceContext {
     }
 
     private void finish(TraceSpan span) {
+        span.stop();
         SpanLogInfo spanLogInfo = new SpanLogInfo(span);
         MDC.put(NounConstant.TRACE_ID, spanLogInfo.getTraceId());
         MDC.put(NounConstant.PARENT_ID, String.valueOf(spanLogInfo.getParentId()));
