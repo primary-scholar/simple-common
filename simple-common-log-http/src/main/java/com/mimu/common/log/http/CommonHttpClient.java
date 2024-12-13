@@ -90,6 +90,9 @@ public class CommonHttpClient {
         String result = StringUtils.EMPTY;
         HttpEntity entity = null;
         try {
+            ContextCarrier contextCarrier = new ContextCarrier();
+            ContextManager.createExitSpan(StringUtils.EMPTY, contextCarrier, StringUtils.EMPTY);
+            extractCarrier(httpPost, contextCarrier);
             StringEntity param = new StringEntity(content, Charset.defaultCharset());
             param.setContentType("application/json");
             httpPost.setEntity(param);
@@ -98,6 +101,8 @@ public class CommonHttpClient {
             if (Objects.nonNull(entity)) {
                 result = EntityUtils.toString(entity);
             }
+            TraceSpan traceSpan = ContextManager.activeSpan();
+            ContextManager.stopSpan();
         } catch (Exception e) {
         } finally {
             EntityUtils.consume(entity);
@@ -117,6 +122,13 @@ public class CommonHttpClient {
         Map<String, String> tags = carrier.tags();
         for (Map.Entry<String, String> next : tags.entrySet()) {
             httpGet.setHeader(next.getKey(), next.getValue());
+        }
+    }
+
+    private void extractCarrier(HttpPost httpPost, ContextCarrier carrier) {
+        Map<String, String> tags = carrier.tags();
+        for (Map.Entry<String, String> next : tags.entrySet()) {
+            httpPost.setHeader(next.getKey(), next.getValue());
         }
     }
 }
