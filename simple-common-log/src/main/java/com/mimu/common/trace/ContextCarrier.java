@@ -19,6 +19,9 @@ public class ContextCarrier implements Serializable {
         tagValueMap.put(NounConstant.TRACE_ID, StringUtils.EMPTY);
         tagValueMap.put(NounConstant.PARENT_SPAN_ID, StringUtils.EMPTY);
         tagValueMap.put(NounConstant.SPAN_ID, StringUtils.EMPTY);
+        tagValueMap.put(NounConstant.URI, StringUtils.EMPTY);
+        tagValueMap.put(NounConstant.REQUEST, StringUtils.EMPTY);
+        tagValueMap.put(NounConstant.RESPONSE, StringUtils.EMPTY);
         return tagValueMap;
     }
 

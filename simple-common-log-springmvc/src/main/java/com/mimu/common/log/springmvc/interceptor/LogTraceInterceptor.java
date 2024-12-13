@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -35,7 +36,8 @@ public class LogTraceInterceptor implements HandlerInterceptor {
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             ContextCarrier contextCarrier = new ContextCarrier();
             fillCarrier(request, contextCarrier);
-            ContextManager.createEntrySpan(StringUtils.EMPTY, contextCarrier);
+            TraceSpan entrySpan = ContextManager.createEntrySpan(StringUtils.EMPTY, contextCarrier);
+            fillSpanTag(request, response, entrySpan);
         } catch (UnsupportedEncodingException e) {
         }
         return Boolean.TRUE;
@@ -46,6 +48,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
                            ModelAndView modelAndView) throws Exception {
         try {
             TraceSpan traceSpan = ContextManager.activeSpan();
+            fillSpanTag(request, response, traceSpan);
             ContextManager.stopSpan();
         } catch (Exception e) {
         }
@@ -57,60 +60,56 @@ public class LogTraceInterceptor implements HandlerInterceptor {
 
     }
 
-    private String getFullUrl(HttpServletRequest request) throws UnsupportedEncodingException {
-        String uri = request.getRequestURI();
-        if (HttpMethod.GET.equals(HttpMethod.resolve(request.getMethod()))) {
-            String queryString = request.getQueryString();
-            if (StringUtils.isNotEmpty(queryString)) {
-                queryString = URLDecoder.decode(request.getQueryString(), request.getCharacterEncoding());
-                uri = new StringBuilder(uri).append(NounConstant.QUESTION).append(queryString).toString();
-            }
-            return uri;
-        }
-        return uri;
-    }
-
     private Map<String, Object> getParameter(HttpServletRequest request) {
-        String requestStr;
-        try {
-            requestStr = getRequest(request);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        String requestStr = getRequest(request);
         if (HttpMethod.GET.equals(HttpMethod.resolve(request.getMethod()))) {
             return RequestParamResolver.decodeParams(requestStr);
         }
         if (HttpMethod.POST.equals(HttpMethod.resolve(request.getMethod()))) {
-            return JSONObject.parseObject(requestStr);
+            JSONObject parsed = JSONObject.parseObject(requestStr);
+            return Objects.isNull(parsed) ? Collections.emptyMap() : parsed;
         }
         return Collections.emptyMap();
     }
 
-    private String getRequest(HttpServletRequest request) throws UnsupportedEncodingException {
+    private String getRequest(HttpServletRequest request) {
         String param = StringUtils.EMPTY;
-        if (request instanceof ContentCachingRequestWrapper) {
-            ContentCachingRequestWrapper requestWrapper = (ContentCachingRequestWrapper) request;
-            if (HttpMethod.GET.equals(HttpMethod.resolve(request.getMethod()))) {
-                param = URLDecoder.decode(requestWrapper.getQueryString(), requestWrapper.getCharacterEncoding());
+        try {
+            if (request instanceof ContentCachingRequestWrapper) {
+                ContentCachingRequestWrapper requestWrapper = (ContentCachingRequestWrapper) request;
+                if (HttpMethod.GET.equals(HttpMethod.resolve(request.getMethod()))) {
+                    param = URLDecoder.decode(requestWrapper.getQueryString(), requestWrapper.getCharacterEncoding());
+                }
+                if (HttpMethod.POST.equals(HttpMethod.resolve(request.getMethod()))) {
+                    String encoding = requestWrapper.getCharacterEncoding();
+                    byte[] content = requestWrapper.getContentAsByteArray();
+                    param = new String(content, encoding);
+                }
+            } else if (request instanceof StandardMultipartHttpServletRequest) {
+                StandardMultipartHttpServletRequest multipartRequest = (StandardMultipartHttpServletRequest) request;
+                Map<String, String[]> parameterMap = multipartRequest.getParameterMap();
+                HashMap<String, Object> parameter = new HashMap<>();
+                for (Map.Entry<String, String[]> keyValue : parameterMap.entrySet()) {
+                    parameter.put(keyValue.getKey(), keyValue.getValue()[0]);
+                }
+                param = JSONObject.toJSONString(parameter);
             }
-            if (HttpMethod.POST.equals(HttpMethod.resolve(request.getMethod()))) {
-                String encoding = requestWrapper.getCharacterEncoding();
-                byte[] content = requestWrapper.getContentAsByteArray();
-                param = new String(content, encoding);
-            }
-            return param;
+        } catch (UnsupportedEncodingException e) {
         }
         return param;
     }
 
-    private String getResponse(HttpServletResponse response) throws UnsupportedEncodingException {
-        if (response instanceof ContentCachingResponseWrapper) {
-            ContentCachingResponseWrapper responseWrapper = (ContentCachingResponseWrapper) response;
-            String responseStr;
-            String encoding = responseWrapper.getCharacterEncoding();
-            byte[] content = responseWrapper.getContentAsByteArray();
-            responseStr = new String(content, encoding);
-            return responseStr;
+    private String getResponse(HttpServletResponse response) {
+        try {
+            if (response instanceof ContentCachingResponseWrapper) {
+                ContentCachingResponseWrapper responseWrapper = (ContentCachingResponseWrapper) response;
+                String responseStr;
+                String encoding = responseWrapper.getCharacterEncoding();
+                byte[] content = responseWrapper.getContentAsByteArray();
+                responseStr = new String(content, encoding);
+                return responseStr;
+            }
+        } catch (UnsupportedEncodingException e) {
         }
         return StringUtils.EMPTY;
     }
@@ -118,10 +117,10 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     private void fillCarrier(HttpServletRequest request, ContextCarrier carrier) {
         Map<String, String> tags = carrier.emptyTags();
         tags.replaceAll((k, v) -> request.getHeader(k));
+        Map<String, Object> parameter = getParameter(request);
         if (StringUtils.isEmpty(carrier.getTraceId())) {
             String traceId = tags.get(NounConstant.TRACE_ID);
             if (StringUtils.isEmpty(traceId)) {
-                Map<String, Object> parameter = getParameter(request);
                 traceId = parameter.getOrDefault(NounConstant.REQUEST_ID, StringUtils.EMPTY).toString();
             }
             carrier.setTraceId(traceId);
@@ -139,6 +138,24 @@ public class LogTraceInterceptor implements HandlerInterceptor {
                 spanId = String.valueOf(ContextCarrier.DEFAULT_SPAN_ID);
             }
             carrier.setSpanId(NumberUtils.toInt(spanId, ContextCarrier.DEFAULT_SPAN_ID));
+        }
+
+    }
+
+    private void fillSpanTag(HttpServletRequest request, HttpServletResponse response, TraceSpan span) {
+        Map<String, Object> parameter = getParameter(request);
+        Map<String, String> tags = span.getTags();
+        if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
+            span.addTag(NounConstant.URI, request.getRequestURI());
+        }
+        if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
+            span.addTag(NounConstant.REQUEST, getRequest(request));
+        }
+        if (StringUtils.isEmpty(tags.get(NounConstant.CID))) {
+            span.addTag(NounConstant.CID, parameter.getOrDefault(NounConstant.CID, NumberUtils.LONG_ZERO).toString());
+        }
+        if (StringUtils.isEmpty(tags.get(NounConstant.RESPONSE))) {
+            span.addTag(NounConstant.RESPONSE, getResponse(response));
         }
     }
 

@@ -35,4 +35,13 @@ public class CalculateController {
         return JSONObject.toJSONString(success);
     }
 
+    @RequestMapping(value = "/api/cal/num/multi/form", method = RequestMethod.POST)
+    public String postMethodForm(AddParam param) {
+        LOGGER.info("post param:{}", JSONObject.toJSONString(param));
+        CalculateResult calculateResult = new CalculateResult(param.getFirst() * param.getSecond(),
+                param.getDescription());
+        RpcResult<CalculateResult> success = RpcResultUtil.success(calculateResult);
+        return JSONObject.toJSONString(success);
+    }
+
 }

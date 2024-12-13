@@ -1,10 +1,13 @@
 package com.mimu.common;
 
+import com.mimu.common.constants.NounConstant;
 import com.mimu.common.trace.span.TraceSpan;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Objects;
 
 @Setter
@@ -23,10 +26,14 @@ public class SpanLogInfo implements Serializable {
         if (Objects.isNull(span)) {
             return;
         }
+        Map<String, String> tags = span.getTags();
         this.traceId = span.getTracer().getTraceId();
         this.parentSpanId = span.getParentSpanId();
         this.spanId = span.getSpanId();
-        this.remoteInterface = null;
+        this.cid = NumberUtils.toLong(tags.get(NounConstant.CID));
+        this.remoteInterface = tags.get(NounConstant.URI);
         this.cost = Math.toIntExact(span.getEndTime() - span.getStartTime());
+        this.request = tags.get(NounConstant.REQUEST);
+        this.response = tags.get(NounConstant.RESPONSE);
     }
 }
