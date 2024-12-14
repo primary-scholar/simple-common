@@ -3,8 +3,9 @@ package com.mimu.common.log.springmvc.interceptor;
 
 import com.alibaba.fastjson.JSONObject;
 import com.mimu.common.constants.*;
-import com.mimu.common.trace.ContextCarrier;
-import com.mimu.common.trace.ContextManager;
+import com.mimu.common.param.RequestParamResolver;
+import com.mimu.common.trace.context.ContextCarrier;
+import com.mimu.common.trace.context.ContextManager;
 import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;

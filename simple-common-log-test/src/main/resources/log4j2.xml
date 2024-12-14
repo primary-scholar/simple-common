@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="ERROR" monitorInterval="30">
+    <Properties>
+        <Property name="path">common-log-test</Property>
+        <Property name="name">server_name</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <PatternLayout
+                    pattern="|%X{_TRACE_ID_}|%X{_PARENT_SPAN_ID_}|%X{_SPAN_ID_}|%d %-5p [%t] %c（%L)|%X{_URI_}|%X{_COST_}|%X{_REQUEST_}|%X{_RESPONSE_}|%msg%n"/>
+        </Console>
+
+        <RollingFile name="RollingFileInfo" fileName="${path}/${name}.log"
+                     filePattern="${path}/${name}.%d{yyyy-MM-dd}.log">
+            <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="|%X{_TRACE_ID_}|%msg %n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="2 GB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+        <RollingFile name="RollingFileError" fileName="${path}/${name}.err"
+                     filePattern="${path}/${name}-%d{yyyy-MM-dd}.err">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="|%X{_TRACE_ID_}|%msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+        <RollingFile name="IORollingFileInfo" fileName="${path}/io.log"
+                     filePattern="${path}/io-%d{yyyy-MM-dd-HH}.log">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
+            <PatternLayout
+                    pattern="|%X{_TRACE_ID_}|%X{_PARENT_SPAN_ID_}|%X{_SPAN_ID_}|%d %-5p [%t] %c（%L)|%X{_URI_}|%X{_COST_}|%X{_REQUEST_}|%X{_RESPONSE_}|%msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+        <!--<Async name="async">
+            <appender-ref ref="IORollingFileInfo"/>
+        </Async>-->
+    </Appenders>
+
+    <Loggers>
+        <logger name="org.springframework" level="INFO" additivity="false"/>
+        <logger name="IO" level="INFO" additivity="false">
+            <appender-ref ref="IORollingFileInfo"/>
+        </logger>
+
+        <root level="INFO">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="RollingFileInfo"/>
+            <appender-ref ref="RollingFileError"/>
+        </root>
+    </Loggers>
+</Configuration>

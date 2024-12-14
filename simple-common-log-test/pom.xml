@@ -7,11 +7,11 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.mimu.common.log.springmvc</groupId>
-    <artifactId>simple-common-log-springmvc</artifactId>
+    <groupId>com.mimu.common.log.test</groupId>
+    <artifactId>simple-common-log-test</artifactId>
     <packaging>jar</packaging>
 
-    <name>simple-common-log-springmvc</name>
+    <name>simple-common-log-test</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -22,34 +22,20 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
+            <groupId>com.mimu.common.log.springmvc</groupId>
+            <artifactId>simple-common-log-springmvc</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.mimu.common</groupId>
-            <artifactId>simple-common-log</artifactId>
+            <groupId>com.mimu.common.log.http</groupId>
+            <artifactId>simple-common-log-http</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>10</source>
-                    <target>10</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

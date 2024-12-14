@@ -1,5 +1,6 @@
 package com.mimu.common.trace;
 
+import com.mimu.common.trace.id.GlobalIdGenerator;
 import com.mimu.common.trace.span.TraceSpan;
 
 import java.util.LinkedList;
@@ -19,7 +20,7 @@ public class Tracer {
         return traceId;
     }
 
-    void setTraceId(String id) {
+    public void setTraceId(String id) {
         this.traceId = id;
     }
 
