@@ -26,7 +26,7 @@ public class ContextManager {
         TraceContext context = getOrCreateContext();
         TraceSpan entrySpan = context.createEntrySpan(operationName);
         if (Objects.nonNull(carrier) && carrier.isValid()) {
-            context.extract(carrier);
+            context.extract(carrier, entrySpan);
         }
         return entrySpan;
     }

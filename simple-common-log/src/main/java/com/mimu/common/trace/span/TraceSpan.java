@@ -1,6 +1,7 @@
 package com.mimu.common.trace.span;
 
 
+import com.mimu.common.constants.NounConstant;
 import com.mimu.common.trace.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,24 @@ public abstract class TraceSpan implements AbstractSpan {
         return this;
     }
 
+    public Integer getParentSpanId() {
+        return parentSpanId;
+    }
+
+    public void setParentSpanId(Integer parentSpanId) {
+        this.parentSpanId = parentSpanId;
+        this.tags.put(NounConstant.PARENT_SPAN_ID, String.valueOf(parentSpanId));
+    }
+
+    public Integer getSpanId() {
+        return spanId;
+    }
+
+    public void setSpanId(Integer spanId) {
+        this.spanId = spanId;
+        this.tags.put(NounConstant.SPAN_ID, String.valueOf(spanId));
+    }
+
     public void addTag(String key, String value) {
         this.tags.put(key, value);
     }
@@ -52,14 +71,6 @@ public abstract class TraceSpan implements AbstractSpan {
 
     public Tracer getTracer() {
         return tracer;
-    }
-
-    public Integer getParentSpanId() {
-        return parentSpanId;
-    }
-
-    public Integer getSpanId() {
-        return spanId;
     }
 
     public Long getStartTime() {

@@ -51,8 +51,10 @@ public class TraceContext {
         }
     }
 
-    public void extract(ContextCarrier carrier) {
+    public void extract(ContextCarrier carrier, TraceSpan span) {
         this.tracer.setTraceId(carrier.getTraceId());
+        span.setParentSpanId(carrier.getParentSpanId());
+        span.setSpanId(carrier.getSpanId());
     }
 
     public TraceSpan createExitSpan(String operationName, String peer) {

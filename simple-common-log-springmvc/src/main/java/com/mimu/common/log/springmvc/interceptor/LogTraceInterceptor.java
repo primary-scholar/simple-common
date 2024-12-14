@@ -129,14 +129,20 @@ public class LogTraceInterceptor implements HandlerInterceptor {
         if (Objects.isNull(carrier.getParentSpanId())) {
             String parentSpanId = tags.get(NounConstant.PARENT_SPAN_ID);
             if (StringUtils.isEmpty(parentSpanId)) {
-                parentSpanId = String.valueOf(ContextCarrier.DEFAULT_PARENT_SPAN_ID);
+                parentSpanId = request.getHeader(NounConstant.PARENT_SPAN_ID);
+                if (StringUtils.isEmpty(parentSpanId)) {
+                    parentSpanId = String.valueOf(ContextCarrier.DEFAULT_PARENT_SPAN_ID);
+                }
             }
             carrier.setParentSpanId(NumberUtils.toInt(parentSpanId, ContextCarrier.DEFAULT_PARENT_SPAN_ID));
         }
         if (Objects.isNull(carrier.getSpanId())) {
             String spanId = tags.get(NounConstant.SPAN_ID);
             if (StringUtils.isEmpty(spanId)) {
-                spanId = String.valueOf(ContextCarrier.DEFAULT_SPAN_ID);
+                spanId = request.getHeader(NounConstant.SPAN_ID);
+                if (StringUtils.isEmpty(spanId)) {
+                    spanId = String.valueOf(ContextCarrier.DEFAULT_SPAN_ID);
+                }
             }
             carrier.setSpanId(NumberUtils.toInt(spanId, ContextCarrier.DEFAULT_SPAN_ID));
         }
