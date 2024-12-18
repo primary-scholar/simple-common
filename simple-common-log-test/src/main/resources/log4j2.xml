@@ -8,7 +8,7 @@
         <Console name="Console" target="SYSTEM_OUT">
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
             <PatternLayout
-                    pattern="|%X{_TRACE_ID_}|%X{_PARENT_SPAN_ID_}|%X{_SPAN_ID_}|%d %-5p [%t] %c（%L)|%X{_URI_}|%X{_COST_}|%X{_REQUEST_}|%X{_RESPONSE_}|%msg%n"/>
+                    pattern="|%X{_TRACE_ID_}|%X{_PARENT_SPAN_ID_}|%X{_SPAN_ID_}|%X{_START_TIME_}|%d %-5p [%t] %c（%L)|%X{_URI_}|%X{_COST_}|%X{_REQUEST_}|%X{_RESPONSE_}|%msg%n"/>
         </Console>
 
         <RollingFile name="RollingFileInfo" fileName="${path}/${name}.log"
@@ -37,7 +37,7 @@
                      filePattern="${path}/io-%d{yyyy-MM-dd-HH}.log">
             <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
             <PatternLayout
-                    pattern="|%X{_TRACE_ID_}|%X{_PARENT_SPAN_ID_}|%X{_SPAN_ID_}|%d %-5p [%t] %c（%L)|%X{_URI_}|%X{_COST_}|%X{_REQUEST_}|%X{_RESPONSE_}|%msg%n"/>
+                    pattern="|%X{_TRACE_ID_}|%X{_PARENT_SPAN_ID_}|%X{_SPAN_ID_}|%X{_START_TIME_}|%d %-5p [%t] %c（%L)|%X{_URI_}|%X{_COST_}|%X{_REQUEST_}|%X{_RESPONSE_}|%msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>

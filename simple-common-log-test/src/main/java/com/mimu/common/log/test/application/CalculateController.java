@@ -15,13 +15,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 public class CalculateController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CalculateController.class);
+    private static final Integer waitSeconds = 10000;
 
     @Autowired
     private RpcCalculateByHttpService rpcCalculateByHttpService;
+    @Autowired
+    private ExecutorService executorService;
 
     @RequestMapping(value = "/api/cal/num/add", method = RequestMethod.GET)
     public RpcResult getMethod(AddParam param) {
@@ -73,6 +78,53 @@ public class CalculateController {
         RpcResult<CalculateResult> result = Objects.isNull(calculateResult) ? RpcResultUtil.fail() :
                 RpcResultUtil.success(calculateResult);
         return JSONObject.toJSONString(result);
+    }
+
+    @RequestMapping(value = "/api/cal/remote/num/add/thread", method = RequestMethod.GET)
+    public RpcResult getRemoteMethodNewThread(AddParam param) {
+        LOGGER.info("get param:{}", JSONObject.toJSONString(param));
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        AtomicReference<CalculateResult> atomicReference = new AtomicReference<>();
+        Thread thread = new Thread(() -> {
+            atomicReference.set(rpcCalculateByHttpService.rpcGetResult(param));
+            countDownLatch.countDown();
+        });
+        thread.start();
+        try {
+            countDownLatch.await(waitSeconds, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+        }
+        CalculateResult calculateResult = atomicReference.get();
+        return Objects.isNull(calculateResult) ? RpcResultUtil.fail() : RpcResultUtil.success(calculateResult);
+    }
+
+    @RequestMapping(value = "/api/cal/remote/num/add/execute", method = RequestMethod.GET)
+    public RpcResult getRemoteMethodExecute(AddParam param) {
+        LOGGER.info("get param:{}", JSONObject.toJSONString(param));
+        CalculateResult calculateResult = null;
+        Future<CalculateResult> submit = executorService.submit(() -> rpcCalculateByHttpService.rpcGetResult(param));
+        try {
+            calculateResult = submit.get(waitSeconds, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+        } catch (ExecutionException e) {
+        } catch (TimeoutException e) {
+        }
+        return Objects.isNull(calculateResult) ? RpcResultUtil.fail() : RpcResultUtil.success(calculateResult);
+    }
+
+    @RequestMapping(value = "/api/cal/remote/num/add/completefuture", method = RequestMethod.GET)
+    public RpcResult getRemoteMethodCompleteFuture(AddParam param) {
+        LOGGER.info("get param:{}", JSONObject.toJSONString(param));
+        CalculateResult calculateResult = null;
+        CompletableFuture<CalculateResult> completableFuture =
+                CompletableFuture.supplyAsync(() -> rpcCalculateByHttpService.rpcGetResult(param), executorService).thenApply(calculateResult1 -> calculateResult1);
+        try {
+            calculateResult = completableFuture.get(waitSeconds, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+        } catch (ExecutionException e) {
+        } catch (TimeoutException e) {
+        }
+        return Objects.isNull(calculateResult) ? RpcResultUtil.fail() : RpcResultUtil.success(calculateResult);
     }
 
 }

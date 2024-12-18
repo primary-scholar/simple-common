@@ -4,6 +4,7 @@ import com.mimu.common.constants.NounConstant;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -57,9 +58,13 @@ public class RequestParamResolver {
         params.put(name, value);
         if (name.equals(NounConstant.CID_P1)) {
             if (StringUtils.isNotEmpty(value.toString())) {
-                String p1Str = URLDecoder.decode(value.toString(), StandardCharsets.UTF_8);
-                String p1 = new String(Base64.getDecoder().decode(p1Str), StandardCharsets.UTF_8);
-                params.put(NounConstant.CID, NumberUtils.toLong(p1, NumberUtils.LONG_ZERO));
+                String p1Str = null;
+                try {
+                    p1Str = URLDecoder.decode(value.toString(), StandardCharsets.UTF_8.name());
+                    String p1 = new String(Base64.getDecoder().decode(p1Str), StandardCharsets.UTF_8);
+                    params.put(NounConstant.CID, NumberUtils.toLong(p1, NumberUtils.LONG_ZERO));
+                } catch (UnsupportedEncodingException e) {
+                }
             }
         }
         return true;

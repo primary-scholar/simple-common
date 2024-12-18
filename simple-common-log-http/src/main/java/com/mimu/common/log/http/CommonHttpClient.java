@@ -143,7 +143,7 @@ public class CommonHttpClient {
     private String getRequest(HttpGet httpGet) {
         String param = StringUtils.EMPTY;
         try {
-            param = URLDecoder.decode(httpGet.getRequestLine().toString(), StandardCharsets.UTF_8);
+            param = URLDecoder.decode(httpGet.getRequestLine().toString(), StandardCharsets.UTF_8.name());
         } catch (Exception e) {
         }
         return param;

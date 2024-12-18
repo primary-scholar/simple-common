@@ -32,13 +32,13 @@ public class ContextManager {
     }
 
     public static TraceSpan createExitSpan(String operationName, ContextCarrier carrier, String peer) {
-        TraceContext context = get();
+        TraceContext context = getOrCreateContext();
         if (Objects.isNull(context)) {
             throw new IllegalStateException("context is null");
         }
-        TraceSpan entrySpan = context.createExitSpan(operationName, peer);
-        context.inject(carrier, entrySpan);
-        return entrySpan;
+        TraceSpan exitSpan = context.createExitSpan(operationName, peer);
+        context.inject(carrier, exitSpan);
+        return exitSpan;
     }
 
     public static TraceSpan activeSpan() {

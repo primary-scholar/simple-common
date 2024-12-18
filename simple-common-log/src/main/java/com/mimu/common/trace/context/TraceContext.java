@@ -113,12 +113,16 @@ public class TraceContext {
     }
 
     private void finish(TraceSpan span) {
+        if (Objects.isNull(span)) {
+            return;
+        }
         span.stop();
         SpanLogInfo spanLogInfo = new SpanLogInfo(span);
         MDC.put(NounConstant.TRACE_ID, spanLogInfo.getTraceId());
         MDC.put(NounConstant.PARENT_SPAN_ID, String.valueOf(spanLogInfo.getParentSpanId()));
         MDC.put(NounConstant.SPAN_ID, String.valueOf(spanLogInfo.getSpanId()));
         MDC.put(NounConstant.URI, spanLogInfo.getRemoteInterface());
+        MDC.put(NounConstant.START_TIME, String.valueOf(spanLogInfo.getStarTime()));
         MDC.put(NounConstant.COST, String.valueOf(spanLogInfo.getCost()));
         MDC.put(NounConstant.REQUEST, spanLogInfo.getRequest());
         MDC.put(NounConstant.RESPONSE, spanLogInfo.getResponse());
@@ -127,6 +131,7 @@ public class TraceContext {
         MDC.remove(NounConstant.PARENT_SPAN_ID);
         MDC.remove(NounConstant.SPAN_ID);
         MDC.remove(NounConstant.URI);
+        MDC.remove(NounConstant.START_TIME);
         MDC.remove(NounConstant.COST);
         MDC.remove(NounConstant.REQUEST);
         MDC.remove(NounConstant.RESPONSE);
