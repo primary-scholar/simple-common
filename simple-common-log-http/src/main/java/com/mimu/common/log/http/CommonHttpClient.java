@@ -55,6 +55,7 @@ public class CommonHttpClient {
         try {
             return requestByGet(url);
         } catch (IOException e) {
+            IO.error("", e);
         }
         return StringUtils.EMPTY;
     }
@@ -63,6 +64,7 @@ public class CommonHttpClient {
         try {
             return requestByPost(url, jsonParam);
         } catch (IOException e) {
+            IO.error("", e);
         }
         return StringUtils.EMPTY;
     }
@@ -85,13 +87,14 @@ public class CommonHttpClient {
             fillSpanTag(httpGet, result, traceSpan);
             ContextManager.stopSpan();
         } catch (IOException e) {
+            IO.error("", e);
         } finally {
             EntityUtils.consume(entity);
         }
         return result;
     }
 
-    private String requestByPost(String url, String content) throws IOException {
+    private String requestByPost(String url, String request) throws IOException {
         HttpPost httpPost = new HttpPost(url);
         String result = StringUtils.EMPTY;
         HttpEntity entity = null;
@@ -99,8 +102,8 @@ public class CommonHttpClient {
             ContextCarrier contextCarrier = new ContextCarrier();
             TraceSpan exitSpan = ContextManager.createExitSpan(StringUtils.EMPTY, contextCarrier, StringUtils.EMPTY);
             extractCarrier(httpPost, contextCarrier);
-            fillSpanTag(httpPost, content, exitSpan, StringUtils.EMPTY);
-            StringEntity param = new StringEntity(content, StandardCharsets.UTF_8);
+            fillSpanTag(httpPost, request, exitSpan, StringUtils.EMPTY);
+            StringEntity param = new StringEntity(request, StandardCharsets.UTF_8);
             param.setContentType("application/json");
             httpPost.setEntity(param);
             CloseableHttpResponse response = httpClient.execute(httpPost);
@@ -109,9 +112,10 @@ public class CommonHttpClient {
                 result = EntityUtils.toString(entity);
             }
             TraceSpan traceSpan = ContextManager.activeSpan();
-            fillSpanTag(httpPost, content, traceSpan, result);
+            fillSpanTag(httpPost, request, traceSpan, result);
             ContextManager.stopSpan();
         } catch (Exception e) {
+            IO.error("", e);
         } finally {
             EntityUtils.consume(entity);
         }
@@ -143,7 +147,7 @@ public class CommonHttpClient {
     private String getRequest(HttpGet httpGet) {
         String param = StringUtils.EMPTY;
         try {
-            param = URLDecoder.decode(httpGet.getRequestLine().toString(), StandardCharsets.UTF_8.name());
+            param = URLDecoder.decode(httpGet.getURI().toString(), StandardCharsets.UTF_8.name());
         } catch (Exception e) {
         }
         return param;
@@ -152,7 +156,7 @@ public class CommonHttpClient {
     private void fillSpanTag(HttpGet httpGet, String response, TraceSpan span) {
         Map<String, String> tags = span.getTags();
         if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
-            span.addTag(NounConstant.URI, httpGet.getURI().toString());
+            span.addTag(NounConstant.URI, getRequest(httpGet));
         }
         if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
             span.addTag(NounConstant.REQUEST, getRequest(httpGet));
