@@ -1,4 +1,4 @@
-package com.mimu.common.log.test.application;
+package com.mimu.common.log.test.application.config;
 
 import com.mimu.common.log.http.CommonHttpClient;
 import com.mimu.common.log.http.PoolingHttpConnectionManagerConfig;
@@ -10,8 +10,7 @@ public class CommonHttpClientConfig {
 
     @Bean
     public CommonHttpClient commonHttpClient() {
-        PoolingHttpConnectionManagerConfig poolingHttpConnectionManagerConfig =
-                new PoolingHttpConnectionManagerConfig();
+        PoolingHttpConnectionManagerConfig poolingHttpConnectionManagerConfig = new PoolingHttpConnectionManagerConfig();
         return new CommonHttpClient(poolingHttpConnectionManagerConfig);
     }
 }

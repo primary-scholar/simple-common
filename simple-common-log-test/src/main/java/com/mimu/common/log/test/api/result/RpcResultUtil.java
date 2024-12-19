@@ -1,4 +1,4 @@
-package com.mimu.common.log.test.api;
+package com.mimu.common.log.test.api.result;
 
 public class RpcResultUtil {
 

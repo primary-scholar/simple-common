@@ -1,13 +1,12 @@
 package com.mimu.common.trace.context;
 
-import com.alibaba.ttl.TransmittableThreadLocal;
 import com.mimu.common.trace.span.TraceSpan;
 
 import java.util.Objects;
 
 public class ContextManager {
 
-    private static final TransmittableThreadLocal<TraceContext> CONTEXT = new TransmittableThreadLocal<>();
+    private static final ThreadLocal<TraceContext> CONTEXT = new ThreadLocal<>();
 
     private static TraceContext getOrCreateContext() {
         TraceContext context = CONTEXT.get();

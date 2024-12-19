@@ -1,5 +1,4 @@
-package com.mimu.common.log.test.api;
-
+package com.mimu.common.log.test.api.result;
 
 import lombok.Getter;
 import lombok.Setter;
