@@ -16,6 +16,10 @@ public class NumberCalculateResult extends BaseParam implements Serializable {
     /**
      *
      */
+    private String operationDesc;
+    /**
+     *
+     */
     private NumberSeedResult first;
     /**
      *

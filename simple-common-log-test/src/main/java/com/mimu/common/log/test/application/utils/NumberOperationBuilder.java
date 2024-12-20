@@ -25,6 +25,7 @@ public class NumberOperationBuilder {
         NumberCalculateResult result = new NumberCalculateResult();
         result.setP1(param.getP1());
         result.setOperation(operation);
+        result.setOperationDesc(select.getOperationDesc());
         result.setFirst(first);
         result.setSecond(second);
         result.setResult(operate);
