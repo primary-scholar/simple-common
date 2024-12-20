@@ -161,7 +161,8 @@ public class CommonHttpClient {
         if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
             span.addTag(NounConstant.REQUEST, getRequest(httpGet));
         }
-        if (StringUtils.isEmpty(tags.get(NounConstant.CID))) {
+        String tagCid = tags.get(NounConstant.CID);
+        if (StringUtils.isEmpty(tagCid) || NumberUtils.toLong(tagCid) <= NumberUtils.LONG_ZERO) {
             Map<String, Object> params = RequestParamResolver.decodeParams(getRequest(httpGet));
             span.addTag(NounConstant.CID, params.getOrDefault(NounConstant.CID, NumberUtils.LONG_ZERO).toString());
         }
@@ -183,7 +184,8 @@ public class CommonHttpClient {
         if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
             span.addTag(NounConstant.REQUEST, request);
         }
-        if (StringUtils.isEmpty(tags.get(NounConstant.CID))) {
+        String tagCid = tags.get(NounConstant.CID);
+        if (StringUtils.isEmpty(tagCid) || NumberUtils.toLong(tagCid) <= NumberUtils.LONG_ZERO) {
             JSONObject parsed = JSONObject.parseObject(request);
             RequestParamResolver.fillCidParam(parsed);
             span.addTag(NounConstant.CID, parsed.getOrDefault(NounConstant.CID, NumberUtils.LONG_ZERO).toString());

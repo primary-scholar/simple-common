@@ -159,9 +159,9 @@ public class LogTraceInterceptor implements HandlerInterceptor {
         if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
             span.addTag(NounConstant.REQUEST, getRequest(request));
         }
-        if (StringUtils.isEmpty(tags.get(NounConstant.CID))) {
-            Object cid = parameter.get(NounConstant.CID);
-            span.addTag(NounConstant.CID, Objects.isNull(cid) ? StringUtils.EMPTY : String.valueOf(cid));
+        String tagCid = tags.get(NounConstant.CID);
+        if (StringUtils.isEmpty(tagCid) || NumberUtils.toLong(tagCid) <= NumberUtils.LONG_ZERO) {
+            span.addTag(NounConstant.CID, parameter.getOrDefault(NounConstant.CID, NumberUtils.LONG_ZERO).toString());
         }
     }
 
