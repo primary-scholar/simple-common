@@ -1,6 +1,7 @@
 package com.mimu.common.param;
 
 import com.mimu.common.constants.NounConstant;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class RequestParamResolver {
 
@@ -54,19 +56,31 @@ public class RequestParamResolver {
         return params;
     }
 
-    private static boolean addParam(Map<String, Object> params, String name, Object value) {
-        params.put(name, value);
-        if (name.equals(NounConstant.CID_P1)) {
-            if (StringUtils.isNotEmpty(value.toString())) {
-                String p1Str = null;
+    public static void fillCidParam(Map<String, Object> params) {
+        if (MapUtils.isEmpty(params)) {
+            return;
+        }
+        Object cid = params.get(NounConstant.CID);
+        if (Objects.nonNull(cid) && NumberUtils.toLong(String.valueOf(cid)) > NumberUtils.LONG_ZERO) {
+            return;
+        }
+        Object P1 = params.get(NounConstant.CID_P1);
+        if (Objects.nonNull(P1)) {
+            String p1Str = String.valueOf(P1);
+            if (StringUtils.isNotEmpty(p1Str)) {
                 try {
-                    p1Str = URLDecoder.decode(value.toString(), StandardCharsets.UTF_8.name());
+                    p1Str = URLDecoder.decode(p1Str, StandardCharsets.UTF_8.name());
                     String p1 = new String(Base64.getDecoder().decode(p1Str), StandardCharsets.UTF_8);
                     params.put(NounConstant.CID, NumberUtils.toLong(p1, NumberUtils.LONG_ZERO));
                 } catch (UnsupportedEncodingException e) {
                 }
             }
         }
+    }
+
+    private static boolean addParam(Map<String, Object> params, String name, Object value) {
+        params.put(name, value);
+        fillCidParam(params);
         return true;
     }
 

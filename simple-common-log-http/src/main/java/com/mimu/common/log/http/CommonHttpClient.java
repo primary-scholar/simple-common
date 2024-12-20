@@ -77,7 +77,7 @@ public class CommonHttpClient {
             ContextCarrier contextCarrier = new ContextCarrier();
             TraceSpan exitSpan = ContextManager.createExitSpan(StringUtils.EMPTY, contextCarrier, StringUtils.EMPTY);
             extractCarrier(httpGet, contextCarrier);
-            fillSpanTag(httpGet, StringUtils.EMPTY, exitSpan);
+            fillSpanTag(httpGet, exitSpan);
             CloseableHttpResponse response = httpClient.execute(httpGet);
             entity = response.getEntity();
             if (Objects.nonNull(entity)) {
@@ -102,7 +102,7 @@ public class CommonHttpClient {
             ContextCarrier contextCarrier = new ContextCarrier();
             TraceSpan exitSpan = ContextManager.createExitSpan(StringUtils.EMPTY, contextCarrier, StringUtils.EMPTY);
             extractCarrier(httpPost, contextCarrier);
-            fillSpanTag(httpPost, request, exitSpan, StringUtils.EMPTY);
+            fillSpanTag(httpPost, request, exitSpan);
             StringEntity param = new StringEntity(request, StandardCharsets.UTF_8);
             param.setContentType("application/json");
             httpPost.setEntity(param);
@@ -153,7 +153,7 @@ public class CommonHttpClient {
         return param;
     }
 
-    private void fillSpanTag(HttpGet httpGet, String response, TraceSpan span) {
+    private void fillSpanTag(HttpGet httpGet, TraceSpan span) {
         Map<String, String> tags = span.getTags();
         if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
             span.addTag(NounConstant.URI, getRequest(httpGet));
@@ -165,12 +165,17 @@ public class CommonHttpClient {
             Map<String, Object> params = RequestParamResolver.decodeParams(getRequest(httpGet));
             span.addTag(NounConstant.CID, params.getOrDefault(NounConstant.CID, NumberUtils.LONG_ZERO).toString());
         }
+    }
+
+    private void fillSpanTag(HttpGet httpGet, String result, TraceSpan span) {
+        Map<String, String> tags = span.getTags();
+        fillSpanTag(httpGet, span);
         if (StringUtils.isEmpty(tags.get(NounConstant.RESPONSE))) {
-            span.addTag(NounConstant.RESPONSE, response);
+            span.addTag(NounConstant.RESPONSE, result);
         }
     }
 
-    private void fillSpanTag(HttpPost httpPost, String request, TraceSpan span, String response) {
+    private void fillSpanTag(HttpPost httpPost, String request, TraceSpan span) {
         Map<String, String> tags = span.getTags();
         if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
             span.addTag(NounConstant.URI, httpPost.getURI().toString());
@@ -180,10 +185,17 @@ public class CommonHttpClient {
         }
         if (StringUtils.isEmpty(tags.get(NounConstant.CID))) {
             JSONObject parsed = JSONObject.parseObject(request);
+            RequestParamResolver.fillCidParam(parsed);
             span.addTag(NounConstant.CID, parsed.getOrDefault(NounConstant.CID, NumberUtils.LONG_ZERO).toString());
         }
+    }
+
+    private void fillSpanTag(HttpPost httpPost, String request, TraceSpan span, String response) {
+        Map<String, String> tags = span.getTags();
+        fillSpanTag(httpPost, request, span);
         if (StringUtils.isEmpty(tags.get(NounConstant.RESPONSE))) {
             span.addTag(NounConstant.RESPONSE, response);
         }
     }
+
 }

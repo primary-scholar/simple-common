@@ -119,6 +119,7 @@ public class TraceContext {
         span.stop();
         SpanLogInfo spanLogInfo = new SpanLogInfo(span);
         MDC.put(NounConstant.TRACE_ID, spanLogInfo.getTraceId());
+        MDC.put(NounConstant.CID, String.valueOf(spanLogInfo.getCid()));
         MDC.put(NounConstant.PARENT_SPAN_ID, String.valueOf(spanLogInfo.getParentSpanId()));
         MDC.put(NounConstant.SPAN_ID, String.valueOf(spanLogInfo.getSpanId()));
         MDC.put(NounConstant.URI, spanLogInfo.getRemoteInterface());
@@ -128,6 +129,7 @@ public class TraceContext {
         MDC.put(NounConstant.RESPONSE, spanLogInfo.getResponse());
         IO.info("");
         MDC.remove(NounConstant.TRACE_ID);
+        MDC.remove(NounConstant.CID);
         MDC.remove(NounConstant.PARENT_SPAN_ID);
         MDC.remove(NounConstant.SPAN_ID);
         MDC.remove(NounConstant.URI);

@@ -38,7 +38,7 @@ public class CalculateRpcController {
         LOGGER.info("get param:{}", JSONObject.toJSONString(param));
         NumberSeedResult first = operationHttpService.numberSeedGet(param);
         NumberSeedResult second = operationHttpService.numberSeedGet(param);
-        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param.getOperation());
+        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
         NumberCalculateResult operationResult = operationHttpService.numberOperationPost(operationParam);
         return Objects.isNull(operationResult) ? RpcResultUtil.fail() : RpcResultUtil.success(operationResult);
     }
@@ -49,7 +49,7 @@ public class CalculateRpcController {
         LOGGER.info("post param:{}", JSONObject.toJSONString(param));
         NumberSeedResult first = operationHttpService.numberSeedGet(param);
         NumberSeedResult second = operationHttpService.numberSeedGet(param);
-        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param.getOperation());
+        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
         NumberCalculateResult operationResult = operationHttpService.numberOperationPost(operationParam);
         return Objects.isNull(operationResult) ? RpcResultUtil.fail() : RpcResultUtil.success(operationResult);
     }
@@ -60,7 +60,7 @@ public class CalculateRpcController {
         LOGGER.info("post param:{}", JSONObject.toJSONString(param));
         NumberSeedResult first = operationHttpService.numberSeedGet(param);
         NumberSeedResult second = operationHttpService.numberSeedGet(param);
-        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param.getOperation());
+        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
         NumberCalculateResult operationResult = operationHttpService.numberOperationPost(operationParam);
         return Objects.isNull(operationResult) ? RpcResultUtil.fail() : RpcResultUtil.success(operationResult);
     }
@@ -84,10 +84,10 @@ public class CalculateRpcController {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        NumberSeedResult first =firstRef.get();
+        NumberSeedResult first = firstRef.get();
         NumberSeedResult second = secondRef.get();
         CountDownLatch stepS = new CountDownLatch(1);
-        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param.getOperation());
+        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
         AtomicReference<NumberCalculateResult> thirdRef = new AtomicReference<>();
         new Thread(() -> {
             thirdRef.set(operationHttpService.numberOperationPost(operationParam));

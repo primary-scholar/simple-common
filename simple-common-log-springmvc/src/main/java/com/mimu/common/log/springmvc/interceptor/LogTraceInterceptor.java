@@ -38,7 +38,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
             ContextCarrier contextCarrier = new ContextCarrier();
             fillCarrier(request, contextCarrier);
             TraceSpan entrySpan = ContextManager.createEntrySpan(StringUtils.EMPTY, contextCarrier);
-            fillSpanTag(request, response, entrySpan);
+            fillSpanTag(request, entrySpan);
         } catch (UnsupportedEncodingException e) {
         }
         return Boolean.TRUE;
@@ -68,6 +68,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
         }
         if (HttpMethod.POST.equals(HttpMethod.resolve(request.getMethod()))) {
             JSONObject parsed = JSONObject.parseObject(requestStr);
+            RequestParamResolver.fillCidParam(parsed);
             return Objects.isNull(parsed) ? Collections.emptyMap() : parsed;
         }
         return Collections.emptyMap();
@@ -149,7 +150,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
 
     }
 
-    private void fillSpanTag(HttpServletRequest request, HttpServletResponse response, TraceSpan span) {
+    private void fillSpanTag(HttpServletRequest request, TraceSpan span) {
         Map<String, Object> parameter = getParameter(request);
         Map<String, String> tags = span.getTags();
         if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
@@ -159,8 +160,14 @@ public class LogTraceInterceptor implements HandlerInterceptor {
             span.addTag(NounConstant.REQUEST, getRequest(request));
         }
         if (StringUtils.isEmpty(tags.get(NounConstant.CID))) {
-            span.addTag(NounConstant.CID, parameter.getOrDefault(NounConstant.CID, NumberUtils.LONG_ZERO).toString());
+            Object cid = parameter.get(NounConstant.CID);
+            span.addTag(NounConstant.CID, Objects.isNull(cid) ? StringUtils.EMPTY : String.valueOf(cid));
         }
+    }
+
+    private void fillSpanTag(HttpServletRequest request, HttpServletResponse response, TraceSpan span) {
+        fillSpanTag(request, span);
+        Map<String, String> tags = span.getTags();
         if (StringUtils.isEmpty(tags.get(NounConstant.RESPONSE))) {
             span.addTag(NounConstant.RESPONSE, getResponse(response));
         }

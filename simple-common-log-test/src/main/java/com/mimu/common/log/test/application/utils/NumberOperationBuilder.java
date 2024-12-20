@@ -23,6 +23,7 @@ public class NumberOperationBuilder {
         NumberSeedResult second = param.getSecond();
         Integer operate = select.operate(first, second);
         NumberCalculateResult result = new NumberCalculateResult();
+        result.setP1(param.getP1());
         result.setOperation(operation);
         result.setFirst(first);
         result.setSecond(second);
@@ -30,12 +31,14 @@ public class NumberOperationBuilder {
         return result;
     }
 
-    public static NumberCalculateParam build(NumberSeedResult first, NumberSeedResult second, Integer operation) {
-        NumberCalculateParam param = new NumberCalculateParam();
-        param.setFirst(first);
-        param.setSecond(second);
-        param.setOperation(operation);
-        return param;
+    public static NumberCalculateParam build(NumberSeedResult first, NumberSeedResult second,
+                                             NumberOperationParam operationParam) {
+        NumberCalculateParam calculateParam = new NumberCalculateParam();
+        calculateParam.setP1(operationParam.getP1());
+        calculateParam.setFirst(first);
+        calculateParam.setSecond(second);
+        calculateParam.setOperation(operationParam.getOperation());
+        return calculateParam;
     }
 
 }

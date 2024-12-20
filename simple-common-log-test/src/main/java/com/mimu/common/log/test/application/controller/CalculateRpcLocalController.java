@@ -36,7 +36,7 @@ public class CalculateRpcLocalController {
         LOGGER.info("get param:{}", JSONObject.toJSONString(param));
         NumberSeedResult first = operationHttpService.numberSeedGet(param);
         NumberSeedResult second = JSONObject.parseObject(JSONObject.toJSONString(first), NumberSeedResult.class);
-        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param.getOperation());
+        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
         NumberCalculateResult operationResult = operationHttpService.numberOperationPost(operationParam);
         return Objects.isNull(operationResult) ? RpcResultUtil.fail() : RpcResultUtil.success(operationResult);
     }
@@ -58,7 +58,7 @@ public class CalculateRpcLocalController {
         NumberSeedResult first = firstRef.get();
         CountDownLatch stepS = new CountDownLatch(1);
         NumberSeedResult second = JSONObject.parseObject(JSONObject.toJSONString(first), NumberSeedResult.class);
-        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param.getOperation());
+        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
         AtomicReference<NumberCalculateResult> thirdRef = new AtomicReference<>();
         new Thread(() -> {
             thirdRef.set(operationHttpService.numberOperationPost(operationParam));
@@ -84,7 +84,7 @@ public class CalculateRpcLocalController {
             LOGGER.error("", e);
         }
         NumberSeedResult second = JSONObject.parseObject(JSONObject.toJSONString(first), NumberSeedResult.class);
-        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param.getOperation());
+        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
         NumberCalculateResult operationResult = operationHttpService.numberOperationPost(operationParam);
         return Objects.isNull(operationResult) ? RpcResultUtil.fail() : RpcResultUtil.success(operationResult);
     }
