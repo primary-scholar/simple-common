@@ -41,20 +41,23 @@ public class TraceContext {
         if (Objects.nonNull(parentSpan) && parentSpan.isEntry()) {
             parentSpan.setSpanName(operationName);
             entrySpan = parentSpan;
-            return entrySpan.start();
+            entrySpan.start();
         } else {
             Integer parentSpanId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
                     parentSpan.getParentSpanId();
             entrySpan = new EntrySpan(parentSpanId++, operationName, spanIdGenerator++, currentTracer);
             entrySpan.start();
-            return push(entrySpan);
+            push(entrySpan);
         }
+        fillLogMdcInfo();
+        return entrySpan;
     }
 
     public void extract(ContextCarrier carrier, TraceSpan span) {
         this.tracer.setTraceId(carrier.getTraceId());
         span.setParentSpanId(carrier.getParentSpanId());
         span.setSpanId(carrier.getSpanId());
+        fillLogMdcInfo();
     }
 
     public TraceSpan createExitSpan(String operationName, String peer) {
@@ -67,9 +70,10 @@ public class TraceContext {
             Integer parentSpanId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
                     parentSpan.getParentSpanId();
             exitSpan = new ExitSpan(parentSpanId++, operationName, spanIdGenerator++, currentTracer);
-            return push(exitSpan);
+            push(exitSpan);
         }
         exitSpan.start();
+        fillLogMdcInfo();
         return exitSpan;
     }
 
@@ -77,6 +81,7 @@ public class TraceContext {
         carrier.setTraceId(this.tracer.getTraceId());
         carrier.setParentSpanId(span.getParentSpanId());
         carrier.setSpanId(span.getSpanId());
+        fillLogMdcInfo();
     }
 
     public TraceSpan activeSpan() {
@@ -137,6 +142,10 @@ public class TraceContext {
         MDC.remove(NounConstant.COST);
         MDC.remove(NounConstant.REQUEST);
         MDC.remove(NounConstant.RESPONSE);
+    }
+
+    private void fillLogMdcInfo() {
+        MDC.put(NounConstant.TRACE_ID, this.tracer.getTraceId());
     }
 
 }
