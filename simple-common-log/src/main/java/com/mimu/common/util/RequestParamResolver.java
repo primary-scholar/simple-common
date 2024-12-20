@@ -1,4 +1,4 @@
-package com.mimu.common.param;
+package com.mimu.common.util;
 
 import com.mimu.common.constants.NounConstant;
 import org.apache.commons.collections4.MapUtils;

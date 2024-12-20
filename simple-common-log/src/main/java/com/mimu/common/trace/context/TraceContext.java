@@ -77,7 +77,8 @@ public class TraceContext {
     }
 
     public TraceContextSnapshot capture() {
-        return null;
+        TraceSpan traceSpan = activeSpan();
+        return new TraceContextSnapshot(this.tracer.getTraceId(), traceSpan.getSpanId(), traceSpan.getSpanSequenceId());
     }
 
     public TraceSpan activeSpan() {

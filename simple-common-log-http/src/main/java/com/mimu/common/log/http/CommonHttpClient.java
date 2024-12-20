@@ -2,10 +2,10 @@ package com.mimu.common.log.http;
 
 import com.alibaba.fastjson.JSONObject;
 import com.mimu.common.constants.NounConstant;
-import com.mimu.common.param.RequestParamResolver;
 import com.mimu.common.trace.context.ContextCarrier;
 import com.mimu.common.trace.context.ContextManager;
 import com.mimu.common.trace.span.TraceSpan;
+import com.mimu.common.util.RequestParamResolver;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;

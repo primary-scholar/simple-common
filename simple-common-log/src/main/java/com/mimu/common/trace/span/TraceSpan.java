@@ -65,6 +65,10 @@ public abstract class TraceSpan implements AbstractSpan {
         this.tags.put(NounConstant.SPAN_SEQUENCE_ID, String.valueOf(spanSequenceId));
     }
 
+    public DistributedId getSpanId() {
+        return spanId;
+    }
+
     public void addTag(String key, String value) {
         this.tags.put(key, value);
     }
