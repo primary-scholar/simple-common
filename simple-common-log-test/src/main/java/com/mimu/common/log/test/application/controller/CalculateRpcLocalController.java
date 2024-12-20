@@ -10,6 +10,9 @@ import com.mimu.common.log.test.api.result.RpcResult;
 import com.mimu.common.log.test.api.result.RpcResultUtil;
 import com.mimu.common.log.test.application.service.CalculateRpcLocalHttpService;
 import com.mimu.common.log.test.application.utils.NumberOperationBuilder;
+import com.mimu.common.trace.context.ContextManager;
+import com.mimu.common.trace.context.TraceContextSnapshot;
+import com.mimu.common.wrapper.RunnableWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +67,39 @@ public class CalculateRpcLocalController {
             thirdRef.set(operationHttpService.numberOperationPost(operationParam));
             stepS.countDown();
         }).start();
+        try {
+            stepS.await();
+        } catch (InterruptedException e) {
+            LOGGER.error("", e);
+        }
+        NumberCalculateResult operationResult = thirdRef.get();
+        return Objects.isNull(operationResult) ? RpcResultUtil.fail() : RpcResultUtil.success(operationResult);
+    }
+
+    @RequestMapping(value = "/api/num/rpc/local/cal/get/thread/wrapper", method = RequestMethod.GET)
+    public RpcResult calculateNumberThreadWrapper(NumberOperationParam param) {
+        LOGGER.info("get param:{}", JSONObject.toJSONString(param));
+        CountDownLatch stepF = new CountDownLatch(1);
+        AtomicReference<NumberSeedResult> firstRef = new AtomicReference<>();
+        TraceContextSnapshot snapshot = ContextManager.capture();
+        new Thread(new RunnableWrapper(() -> {
+            firstRef.set(operationHttpService.numberSeedGet(param));
+            stepF.countDown();
+        }, snapshot)).start();
+        try {
+            stepF.await();
+        } catch (InterruptedException e) {
+            LOGGER.error("", e);
+        }
+        NumberSeedResult first = firstRef.get();
+        CountDownLatch stepS = new CountDownLatch(1);
+        NumberSeedResult second = JSONObject.parseObject(JSONObject.toJSONString(first), NumberSeedResult.class);
+        NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
+        AtomicReference<NumberCalculateResult> thirdRef = new AtomicReference<>();
+        new Thread(new RunnableWrapper(() -> {
+            thirdRef.set(operationHttpService.numberOperationPost(operationParam));
+            stepS.countDown();
+        }, snapshot)).start();
         try {
             stepS.await();
         } catch (InterruptedException e) {

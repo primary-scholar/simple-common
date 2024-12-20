@@ -49,6 +49,22 @@ public class ContextManager {
         return exitSpan;
     }
 
+    public static TraceSpan createLocalSpan(String operationName) {
+        TraceContext context = getOrCreateContext();
+        return context.createLocalSpan(operationName);
+    }
+
+    public static void continued(TraceContextSnapshot contextSnapshot) {
+        if (Objects.isNull(contextSnapshot)) {
+            throw new IllegalStateException("context snapshot is null");
+        }
+        if (!contextSnapshot.isFromCurrent()) {
+            if (contextSnapshot.isValid()) {
+                get().continued(contextSnapshot);
+            }
+        }
+    }
+
     public static TraceContextSnapshot capture() {
         return get().capture();
     }

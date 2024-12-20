@@ -5,21 +5,24 @@ import com.mimu.common.trace.context.TraceContextSnapshot;
 import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.StringUtils;
 
-public class RunnableWrapper implements Runnable {
-    private Runnable runnable;
+import java.util.function.Consumer;
+
+public class ConsumerWrapper<T> implements Consumer<T> {
+
+    private Consumer<T> consumer;
     private TraceContextSnapshot contextSnapshot;
 
-    public RunnableWrapper(Runnable runnable, TraceContextSnapshot contextSnapshot) {
-        this.runnable = runnable;
+    public ConsumerWrapper(Consumer<T> consumer, TraceContextSnapshot contextSnapshot) {
+        this.consumer = consumer;
         this.contextSnapshot = contextSnapshot;
     }
 
     @Override
-    public void run() {
+    public void accept(T t) {
         TraceSpan localSpan = ContextManager.createLocalSpan(StringUtils.EMPTY);
         ContextManager.continued(contextSnapshot);
         try {
-            runnable.run();
+            consumer.accept(t);
         } finally {
             ContextManager.stopSpan();
         }

@@ -5,6 +5,7 @@ import com.mimu.common.constants.NounConstant;
 import com.mimu.common.trace.Tracer;
 import com.mimu.common.trace.span.EntrySpan;
 import com.mimu.common.trace.span.ExitSpan;
+import com.mimu.common.trace.span.LocalSpan;
 import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -18,12 +19,12 @@ import java.util.Objects;
 public class TraceContext {
     private static final Logger IO = LoggerFactory.getLogger("IO");
     private Tracer tracer;
-    private Integer spanSequenceId;
+    private Integer spanSequenceIdGenerator;
     private List<TraceSpan> activeSpans = new LinkedList<>();
 
     public TraceContext() {
         this.tracer = new Tracer();
-        this.spanSequenceId = 0;
+        this.spanSequenceIdGenerator = 0;
     }
 
     public TraceSpan createEntrySpan(String operationName) {
@@ -35,9 +36,8 @@ public class TraceContext {
             entrySpan = parentSpan;
             entrySpan.start();
         } else {
-            Integer parentSequenceId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
-                    parentSpan.getParentSpanSequenceId();
-            entrySpan = new EntrySpan(currentTracer, parentSequenceId++, spanSequenceId++, operationName);
+            Integer parentSequenceId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE : parentSpan.getParentSpanSequenceId();
+            entrySpan = new EntrySpan(currentTracer, parentSequenceId++, spanSequenceIdGenerator++, operationName);
             entrySpan.start();
             push(entrySpan);
         }
@@ -59,9 +59,8 @@ public class TraceContext {
         if (Objects.nonNull(parentSpan) && parentSpan.isExit()) {
             exitSpan = parentSpan;
         } else {
-            Integer parentSequenceId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
-                    parentSpan.getParentSpanSequenceId();
-            exitSpan = new ExitSpan(currentTracer, parentSequenceId++, spanSequenceId++, operationName);
+            Integer parentSequenceId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE : parentSpan.getParentSpanSequenceId();
+            exitSpan = new ExitSpan(currentTracer, parentSequenceId++, spanSequenceIdGenerator++, operationName);
             push(exitSpan);
         }
         exitSpan.start();
@@ -76,9 +75,28 @@ public class TraceContext {
         fillLogMdcInfo();
     }
 
+    public TraceSpan createLocalSpan(String operationName) {
+        TraceSpan localSpan;
+        TraceSpan parentSpan = peek();
+        Tracer currentTracer = this.tracer;
+        Integer parentSequenceId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE : parentSpan.getParentSpanSequenceId();
+        localSpan = new LocalSpan(currentTracer, parentSequenceId++, spanSequenceIdGenerator++, operationName);
+        localSpan.start();
+        return push(localSpan);
+    }
+
     public TraceContextSnapshot capture() {
         TraceSpan traceSpan = activeSpan();
-        return new TraceContextSnapshot(this.tracer.getTraceId(), traceSpan.getSpanId(), traceSpan.getSpanSequenceId());
+        return new TraceContextSnapshot(this.tracer.getTraceId(), traceSpan.getSpanId(), traceSpan.getParentSpanSequenceId(), traceSpan.getSpanSequenceId());
+    }
+
+    public void continued(TraceContextSnapshot contextSnapshot) {
+        if (contextSnapshot.isValid()) {
+            this.tracer.setTraceId(contextSnapshot.getTraceId());
+            TraceSpan traceSpan = activeSpan();
+            traceSpan.setSpanSequenceId(contextSnapshot.getSpanSequenceId());
+            traceSpan.setParentSpanSequenceId(contextSnapshot.getParentSpanSequenceId());
+        }
     }
 
     public TraceSpan activeSpan() {
@@ -115,7 +133,7 @@ public class TraceContext {
     }
 
     private void finish(TraceSpan span) {
-        if (Objects.isNull(span)) {
+        if (Objects.isNull(span) || span instanceof LocalSpan) {
             return;
         }
         span.stop();

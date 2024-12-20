@@ -5,21 +5,24 @@ import com.mimu.common.trace.context.TraceContextSnapshot;
 import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.StringUtils;
 
-public class RunnableWrapper implements Runnable {
-    private Runnable runnable;
+import java.util.function.Supplier;
+
+public class SupplierWrapper<T> implements Supplier<T> {
+
+    private Supplier<T> supplier;
     private TraceContextSnapshot contextSnapshot;
 
-    public RunnableWrapper(Runnable runnable, TraceContextSnapshot contextSnapshot) {
-        this.runnable = runnable;
+    public SupplierWrapper(Supplier supplier, TraceContextSnapshot contextSnapshot) {
+        this.supplier = supplier;
         this.contextSnapshot = contextSnapshot;
     }
 
     @Override
-    public void run() {
+    public T get() {
         TraceSpan localSpan = ContextManager.createLocalSpan(StringUtils.EMPTY);
         ContextManager.continued(contextSnapshot);
         try {
-            runnable.run();
+            return supplier.get();
         } finally {
             ContextManager.stopSpan();
         }
