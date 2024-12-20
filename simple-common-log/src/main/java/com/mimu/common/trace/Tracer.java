@@ -1,36 +1,30 @@
 package com.mimu.common.trace;
 
-import com.mimu.common.trace.id.GlobalIdGenerator;
+import com.mimu.common.trace.id.DistributedId;
 import com.mimu.common.trace.span.TraceSpan;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 
 
 public class Tracer {
-    private String traceId;
-    private List<TraceSpan> spans;
+    private DistributedId traceId;
+    private List<TraceSpan> traceSpans = new LinkedList<>();
 
     public Tracer() {
-        this.traceId = GlobalIdGenerator.generate();
+        this.traceId = new DistributedId();
     }
 
-    public String getTraceId() {
+    public DistributedId getTraceId() {
         return traceId;
     }
 
-    public void setTraceId(String id) {
+    public void setTraceId(DistributedId id) {
         this.traceId = id;
     }
 
-    public TraceSpan addSpan(TraceSpan span) {
-        if (Objects.isNull(spans)) {
-            spans = new LinkedList<>();
-        } else {
-            spans.add(span);
-        }
-        return span;
+    public void addTraceSpan(TraceSpan traceSpan) {
+        this.traceSpans.add(traceSpan);
     }
 
 }

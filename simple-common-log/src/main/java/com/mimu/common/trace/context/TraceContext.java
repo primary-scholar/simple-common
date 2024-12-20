@@ -18,20 +18,12 @@ import java.util.Objects;
 public class TraceContext {
     private static final Logger IO = LoggerFactory.getLogger("IO");
     private Tracer tracer;
-    private Integer spanIdGenerator;
+    private Integer spanSequenceId;
     private List<TraceSpan> activeSpans = new LinkedList<>();
 
     public TraceContext() {
         this.tracer = new Tracer();
-        this.spanIdGenerator = 0;
-    }
-
-    public String getTraceId() {
-        return tracer.getTraceId();
-    }
-
-    public void setTraceId(String requestId) {
-        tracer.setTraceId(requestId);
+        this.spanSequenceId = 0;
     }
 
     public TraceSpan createEntrySpan(String operationName) {
@@ -43,9 +35,9 @@ public class TraceContext {
             entrySpan = parentSpan;
             entrySpan.start();
         } else {
-            Integer parentSpanId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
-                    parentSpan.getParentSpanId();
-            entrySpan = new EntrySpan(parentSpanId++, operationName, spanIdGenerator++, currentTracer);
+            Integer parentSequenceId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
+                    parentSpan.getParentSpanSequenceId();
+            entrySpan = new EntrySpan(currentTracer, parentSequenceId++, spanSequenceId++, operationName);
             entrySpan.start();
             push(entrySpan);
         }
@@ -55,8 +47,8 @@ public class TraceContext {
 
     public void extract(ContextCarrier carrier, TraceSpan span) {
         this.tracer.setTraceId(carrier.getTraceId());
-        span.setParentSpanId(carrier.getParentSpanId());
-        span.setSpanId(carrier.getSpanId());
+        span.setParentSpanSequenceId(carrier.getParentSpanSequenceId());
+        span.setSpanSequenceId(carrier.getSpanSequenceId());
         fillLogMdcInfo();
     }
 
@@ -67,9 +59,9 @@ public class TraceContext {
         if (Objects.nonNull(parentSpan) && parentSpan.isExit()) {
             exitSpan = parentSpan;
         } else {
-            Integer parentSpanId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
-                    parentSpan.getParentSpanId();
-            exitSpan = new ExitSpan(parentSpanId++, operationName, spanIdGenerator++, currentTracer);
+            Integer parentSequenceId = Objects.isNull(parentSpan) ? NumberUtils.INTEGER_MINUS_ONE :
+                    parentSpan.getParentSpanSequenceId();
+            exitSpan = new ExitSpan(currentTracer, parentSequenceId++, spanSequenceId++, operationName);
             push(exitSpan);
         }
         exitSpan.start();
@@ -79,9 +71,13 @@ public class TraceContext {
 
     public void inject(ContextCarrier carrier, TraceSpan span) {
         carrier.setTraceId(this.tracer.getTraceId());
-        carrier.setParentSpanId(span.getParentSpanId());
-        carrier.setSpanId(span.getSpanId());
+        carrier.setParentSpanSequenceId(span.getParentSpanSequenceId());
+        carrier.setSpanSequenceId(span.getSpanSequenceId());
         fillLogMdcInfo();
+    }
+
+    public TraceContextSnapshot capture() {
+        return null;
     }
 
     public TraceSpan activeSpan() {
@@ -125,8 +121,8 @@ public class TraceContext {
         SpanLogInfo spanLogInfo = new SpanLogInfo(span);
         MDC.put(NounConstant.TRACE_ID, spanLogInfo.getTraceId());
         MDC.put(NounConstant.CID, String.valueOf(spanLogInfo.getCid()));
-        MDC.put(NounConstant.PARENT_SPAN_ID, String.valueOf(spanLogInfo.getParentSpanId()));
-        MDC.put(NounConstant.SPAN_ID, String.valueOf(spanLogInfo.getSpanId()));
+        MDC.put(NounConstant.PARENT_SPAN_SEQUENCE_ID, String.valueOf(spanLogInfo.getParentSpanId()));
+        MDC.put(NounConstant.SPAN_SEQUENCE_ID, String.valueOf(spanLogInfo.getSpanId()));
         MDC.put(NounConstant.URI, spanLogInfo.getRemoteInterface());
         MDC.put(NounConstant.START_TIME, String.valueOf(spanLogInfo.getStarTime()));
         MDC.put(NounConstant.COST, String.valueOf(spanLogInfo.getCost()));
@@ -135,8 +131,8 @@ public class TraceContext {
         IO.info("");
         MDC.remove(NounConstant.TRACE_ID);
         MDC.remove(NounConstant.CID);
-        MDC.remove(NounConstant.PARENT_SPAN_ID);
-        MDC.remove(NounConstant.SPAN_ID);
+        MDC.remove(NounConstant.PARENT_SPAN_SEQUENCE_ID);
+        MDC.remove(NounConstant.SPAN_SEQUENCE_ID);
         MDC.remove(NounConstant.URI);
         MDC.remove(NounConstant.START_TIME);
         MDC.remove(NounConstant.COST);
@@ -145,7 +141,7 @@ public class TraceContext {
     }
 
     private void fillLogMdcInfo() {
-        MDC.put(NounConstant.TRACE_ID, this.tracer.getTraceId());
+        MDC.put(NounConstant.TRACE_ID, this.tracer.getTraceId().getId());
     }
 
 }

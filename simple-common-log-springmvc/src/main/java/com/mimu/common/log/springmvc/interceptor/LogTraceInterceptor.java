@@ -120,32 +120,34 @@ public class LogTraceInterceptor implements HandlerInterceptor {
         Map<String, String> tags = carrier.emptyTags();
         tags.replaceAll((k, v) -> request.getHeader(k));
         Map<String, Object> parameter = getParameter(request);
-        if (StringUtils.isEmpty(carrier.getTraceId())) {
+        if (Objects.isNull(carrier.getTraceId())) {
             String traceId = tags.get(NounConstant.TRACE_ID);
             if (StringUtils.isEmpty(traceId)) {
-                traceId = parameter.getOrDefault(NounConstant.REQUEST_ID, StringUtils.EMPTY).toString();
+                Object requestId = parameter.get(NounConstant.REQUEST_ID);
+                traceId = Objects.isNull(requestId) ? StringUtils.EMPTY : requestId.toString();
             }
-            carrier.setTraceId(traceId);
+            carrier.setTraceId(ContextManager.createDistributedId(traceId));
         }
-        if (Objects.isNull(carrier.getParentSpanId())) {
-            String parentSpanId = tags.get(NounConstant.PARENT_SPAN_ID);
-            if (StringUtils.isEmpty(parentSpanId)) {
-                parentSpanId = request.getHeader(NounConstant.PARENT_SPAN_ID);
-                if (StringUtils.isEmpty(parentSpanId)) {
-                    parentSpanId = String.valueOf(ContextCarrier.DEFAULT_PARENT_SPAN_ID);
+        if (Objects.isNull(carrier.getParentSpanSequenceId())) {
+            String parentSequenceId = tags.get(NounConstant.PARENT_SPAN_SEQUENCE_ID);
+            if (StringUtils.isEmpty(parentSequenceId)) {
+                parentSequenceId = request.getHeader(NounConstant.PARENT_SPAN_SEQUENCE_ID);
+                if (StringUtils.isEmpty(parentSequenceId)) {
+                    parentSequenceId = String.valueOf(NounConstant.DEFAULT_PARENT_SPAN_SEQUENCE_ID);
                 }
             }
-            carrier.setParentSpanId(NumberUtils.toInt(parentSpanId, ContextCarrier.DEFAULT_PARENT_SPAN_ID));
+            carrier.setParentSpanSequenceId(NumberUtils.toInt(parentSequenceId,
+                    NounConstant.DEFAULT_PARENT_SPAN_SEQUENCE_ID));
         }
-        if (Objects.isNull(carrier.getSpanId())) {
-            String spanId = tags.get(NounConstant.SPAN_ID);
+        if (Objects.isNull(carrier.getSpanSequenceId())) {
+            String spanId = tags.get(NounConstant.SPAN_SEQUENCE_ID);
             if (StringUtils.isEmpty(spanId)) {
-                spanId = request.getHeader(NounConstant.SPAN_ID);
+                spanId = request.getHeader(NounConstant.SPAN_SEQUENCE_ID);
                 if (StringUtils.isEmpty(spanId)) {
-                    spanId = String.valueOf(ContextCarrier.DEFAULT_SPAN_ID);
+                    spanId = String.valueOf(NounConstant.DEFAULT_SPAN_SEQUENCE_ID);
                 }
             }
-            carrier.setSpanId(NumberUtils.toInt(spanId, ContextCarrier.DEFAULT_SPAN_ID));
+            carrier.setSpanSequenceId(NumberUtils.toInt(spanId, NounConstant.DEFAULT_SPAN_SEQUENCE_ID));
         }
 
     }

@@ -1,6 +1,8 @@
 package com.mimu.common.trace.context;
 
+import com.mimu.common.trace.id.DistributedId;
 import com.mimu.common.trace.span.TraceSpan;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
@@ -17,8 +19,15 @@ public class ContextManager {
         return context;
     }
 
-    public static TraceContext get() {
+    private static TraceContext get() {
         return CONTEXT.get();
+    }
+
+    public static DistributedId createDistributedId(String id) {
+        if (StringUtils.isEmpty(id)) {
+            return null;
+        }
+        return new DistributedId(id);
     }
 
     public static TraceSpan createEntrySpan(String operationName, ContextCarrier carrier) {
@@ -38,6 +47,10 @@ public class ContextManager {
         TraceSpan exitSpan = context.createExitSpan(operationName, peer);
         context.inject(carrier, exitSpan);
         return exitSpan;
+    }
+
+    public static TraceContextSnapshot capture() {
+        return get().capture();
     }
 
     public static TraceSpan activeSpan() {

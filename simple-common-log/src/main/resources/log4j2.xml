@@ -7,15 +7,14 @@
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
-            <PatternLayout
-                    pattern="|%X{_TRACE_ID_}|%X{_PARENT_SPAN_ID_}|%X{_SPAN_ID_}|%d %-5p [%t] %c（%L)|%X{_URI_}|%X{_COST_}|%X{_REQUEST_}|%X{_RESPONSE_}|%msg%n"/>
+            <PatternLayout pattern="|%X{_TRACE_ID_}|%d %-5p [%t] %c(%L)|%msg%n"/>
         </Console>
 
         <RollingFile name="RollingFileInfo" fileName="${path}/${name}.log"
                      filePattern="${path}/${name}.%d{yyyy-MM-dd}.log">
             <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="|%X{_TRACE_ID_}|%msg %n"/>
+            <PatternLayout pattern="|%X{_TRACE_ID_}|%d %-5p [%t] %c(%L)|%msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
                 <SizeBasedTriggeringPolicy size="2 GB"/>
@@ -26,7 +25,7 @@
         <RollingFile name="RollingFileError" fileName="${path}/${name}.err"
                      filePattern="${path}/${name}-%d{yyyy-MM-dd}.err">
             <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="|%X{_TRACE_ID_}|%msg%n"/>
+            <PatternLayout pattern="|%X{_TRACE_ID_}|%d %-5p [%t] %c(%L)|%msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
@@ -37,7 +36,7 @@
                      filePattern="${path}/io-%d{yyyy-MM-dd-HH}.log">
             <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
             <PatternLayout
-                    pattern="|%X{_TRACE_ID_}|%X{_PARENT_SPAN_ID_}|%X{_SPAN_ID_}|%d %-5p [%t] %c（%L)|%X{_URI_}|%X{_COST_}|%X{_REQUEST_}|%X{_RESPONSE_}|%msg%n"/>
+                    pattern="|%X{_TRACE_ID_}|%X{_PARENT_SPAN_SEQUENCE_ID_}|%X{_SPAN_SEQUENCE_ID_}|%X{cid}|%d %-5p [%t] %c（%L)|%X{_URI_}|%X{_COST_}|%X{_REQUEST_}|%X{_RESPONSE_}|%msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>

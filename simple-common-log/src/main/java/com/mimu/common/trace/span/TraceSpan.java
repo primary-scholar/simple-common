@@ -3,6 +3,7 @@ package com.mimu.common.trace.span;
 
 import com.mimu.common.constants.NounConstant;
 import com.mimu.common.trace.Tracer;
+import com.mimu.common.trace.id.DistributedId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,20 +13,23 @@ import java.util.Map;
 public abstract class TraceSpan implements AbstractSpan {
     private static final Logger IO = LoggerFactory.getLogger("IO");
     protected Tracer tracer;
-    protected Integer parentSpanId;
-    protected Integer spanId;
+    protected DistributedId spanId;
+    protected Integer parentSpanSequenceId;
+    protected Integer spanSequenceId;
     protected String spanName;
     protected Long startTime;
     protected Long endTime;
     protected Map<String, String> tags;
 
-    public TraceSpan(Integer parentSpanId, String spanName, Integer spanId, Tracer tracer) {
-        this.parentSpanId = parentSpanId;
-        this.spanName = spanName;
-        this.spanId = spanId;
+    public TraceSpan(Tracer tracer, Integer parentSpanSequenceId, Integer spanSequenceId, String spanName) {
         this.tracer = tracer;
+        this.spanId = new DistributedId();
+        this.parentSpanSequenceId = parentSpanSequenceId;
+        this.spanSequenceId = spanSequenceId;
+        this.spanName = spanName;
         this.startTime = System.currentTimeMillis();
         this.tags = new HashMap<>();
+        this.tracer.addTraceSpan(this);
     }
 
     public TraceSpan setSpanName(String spanName) {
@@ -43,22 +47,22 @@ public abstract class TraceSpan implements AbstractSpan {
         return this;
     }
 
-    public Integer getParentSpanId() {
-        return parentSpanId;
+    public Integer getParentSpanSequenceId() {
+        return parentSpanSequenceId;
     }
 
-    public void setParentSpanId(Integer parentSpanId) {
-        this.parentSpanId = parentSpanId;
-        this.tags.put(NounConstant.PARENT_SPAN_ID, String.valueOf(parentSpanId));
+    public void setParentSpanSequenceId(Integer parentSpanSequenceId) {
+        this.parentSpanSequenceId = parentSpanSequenceId;
+        this.tags.put(NounConstant.PARENT_SPAN_SEQUENCE_ID, String.valueOf(parentSpanSequenceId));
     }
 
-    public Integer getSpanId() {
-        return spanId;
+    public Integer getSpanSequenceId() {
+        return spanSequenceId;
     }
 
-    public void setSpanId(Integer spanId) {
-        this.spanId = spanId;
-        this.tags.put(NounConstant.SPAN_ID, String.valueOf(spanId));
+    public void setSpanSequenceId(Integer spanSequenceId) {
+        this.spanSequenceId = spanSequenceId;
+        this.tags.put(NounConstant.SPAN_SEQUENCE_ID, String.valueOf(spanSequenceId));
     }
 
     public void addTag(String key, String value) {

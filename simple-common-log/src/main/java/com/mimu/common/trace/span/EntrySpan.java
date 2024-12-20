@@ -3,8 +3,8 @@ package com.mimu.common.trace.span;
 import com.mimu.common.trace.Tracer;
 
 public class EntrySpan extends TraceSpan {
-    public EntrySpan(Integer parentSpanId, String spanName, Integer spanId, Tracer tracer) {
-        super(parentSpanId, spanName, spanId, tracer);
+    public EntrySpan(Tracer tracer, Integer parentSequenceId, Integer spanSequenceId, String spanName) {
+        super(tracer, parentSequenceId, spanSequenceId, spanName);
     }
 
     @Override
