@@ -80,11 +80,16 @@ public class CalculateRpcLocalController {
     @RequestMapping(value = "/api/num/rpc/local/cal/get/thread/wrapper", method = RequestMethod.GET)
     public RpcResult calculateNumberThreadWrapper(NumberOperationParam param) {
         LOGGER.info("get param:{}", JSONObject.toJSONString(param));
-        CountDownLatch stepF = new CountDownLatch(1);
+        CountDownLatch stepF = new CountDownLatch(2);
         AtomicReference<NumberSeedResult> firstRef = new AtomicReference<>();
+        AtomicReference<NumberSeedResult> secondRef = new AtomicReference<>();
         TraceContextSnapshot snapshot = ContextManager.capture();
         new Thread(new RunnableWrapper(() -> {
             firstRef.set(operationHttpService.numberSeedGet(param));
+            stepF.countDown();
+        }, snapshot)).start();
+        new Thread(new RunnableWrapper(() -> {
+            secondRef.set(operationHttpService.numberSeedGet(param));
             stepF.countDown();
         }, snapshot)).start();
         try {
@@ -93,16 +98,16 @@ public class CalculateRpcLocalController {
             LOGGER.error("", e);
         }
         NumberSeedResult first = firstRef.get();
-        CountDownLatch stepS = new CountDownLatch(1);
-        NumberSeedResult second = JSONObject.parseObject(JSONObject.toJSONString(first), NumberSeedResult.class);
+        NumberSeedResult second = secondRef.get();
+        CountDownLatch stepT = new CountDownLatch(1);
         NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
         AtomicReference<NumberCalculateResult> thirdRef = new AtomicReference<>();
         new Thread(new RunnableWrapper(() -> {
             thirdRef.set(operationHttpService.numberOperationPost(operationParam));
-            stepS.countDown();
+            stepT.countDown();
         }, snapshot)).start();
         try {
-            stepS.await();
+            stepT.await();
         } catch (InterruptedException e) {
             LOGGER.error("", e);
         }
@@ -136,14 +141,20 @@ public class CalculateRpcLocalController {
     public RpcResult calculateNumberExecuteWrapper(NumberOperationParam param) {
         LOGGER.info("get param:{}", JSONObject.toJSONString(param));
         TraceContextSnapshot snapshot = ContextManager.capture();
-        Future<NumberSeedResult> seedResultFuture = executorService.submit(new CallableWrapper<>(() -> operationHttpService.numberSeedGet(param), snapshot));
         NumberSeedResult first = null;
+        NumberSeedResult second = null;
+        Future<NumberSeedResult> firstFuture = executorService.submit(new CallableWrapper<>(() -> operationHttpService.numberSeedGet(param), snapshot));
         try {
-            first = seedResultFuture.get(waitSeconds, TimeUnit.SECONDS);
+            first = firstFuture.get(waitSeconds, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOGGER.error("", e);
         }
-        NumberSeedResult second = JSONObject.parseObject(JSONObject.toJSONString(first), NumberSeedResult.class);
+        Future<NumberSeedResult> secondFuture = executorService.submit(new CallableWrapper<>(() -> operationHttpService.numberSeedGet(param), snapshot));
+        try {
+            second = secondFuture.get(waitSeconds, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            LOGGER.error("", e);
+        }
         NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
         Future<NumberCalculateResult> calculateResultFuture = executorService.submit(new CallableWrapper<>(() -> operationHttpService.numberOperationPost(operationParam), snapshot));
         NumberCalculateResult operationResult = null;
@@ -173,10 +184,12 @@ public class CalculateRpcLocalController {
     public RpcResult calculateNumberCompleteFutureWrapper(NumberOperationParam param) {
         LOGGER.info("get param:{}", JSONObject.toJSONString(param));
         AtomicReference<NumberSeedResult> firstRef = new AtomicReference<>();
+        AtomicReference<NumberSeedResult> secondRef = new AtomicReference<>();
         TraceContextSnapshot snapshot = ContextManager.capture();
         CompletableFuture.supplyAsync(new SupplierWrapper<>(() -> operationHttpService.numberSeedGet(param), snapshot)).thenAcceptAsync(new ConsumerWrapper<>(numberSeedResult -> firstRef.set(numberSeedResult), snapshot)).join();
+        CompletableFuture.supplyAsync(new SupplierWrapper<>(() -> operationHttpService.numberSeedGet(param), snapshot)).thenAcceptAsync(new ConsumerWrapper<>(numberSeedResult -> secondRef.set(numberSeedResult), snapshot)).join();
         NumberSeedResult first = firstRef.get();
-        NumberSeedResult second = JSONObject.parseObject(JSONObject.toJSONString(first), NumberSeedResult.class);
+        NumberSeedResult second = secondRef.get();
         NumberCalculateParam operationParam = NumberOperationBuilder.build(first, second, param);
         AtomicReference<NumberCalculateResult> thirdRef = new AtomicReference<>();
         RpcResult result = CompletableFuture.supplyAsync(new SupplierWrapper<>(() -> operationHttpService.numberOperationPost(operationParam), snapshot)).thenAcceptAsync(new ConsumerWrapper<>(numberCalculateResult -> thirdRef.set(numberCalculateResult), snapshot)).thenApply(new FunctionWrapper<>((Function<Void, RpcResult>) unused -> Objects.isNull(thirdRef.get()) ? RpcResultUtil.fail() : RpcResultUtil.success(thirdRef.get()), snapshot)).join();
