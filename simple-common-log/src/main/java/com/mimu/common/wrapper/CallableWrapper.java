@@ -9,10 +9,10 @@ import java.util.concurrent.Callable;
 
 public class CallableWrapper<T> implements Callable<T> {
 
-    private Callable<T> callable;
-    private TraceContextSnapshot contextSnapshot;
+    private final Callable<T> callable;
+    private final TraceContextSnapshot contextSnapshot;
 
-    public CallableWrapper(Callable callable, TraceContextSnapshot contextSnapshot) {
+    public CallableWrapper(Callable<T> callable, TraceContextSnapshot contextSnapshot) {
         this.callable = callable;
         this.contextSnapshot = contextSnapshot;
     }

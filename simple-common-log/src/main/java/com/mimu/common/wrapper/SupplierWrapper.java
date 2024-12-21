@@ -9,10 +9,10 @@ import java.util.function.Supplier;
 
 public class SupplierWrapper<T> implements Supplier<T> {
 
-    private Supplier<T> supplier;
-    private TraceContextSnapshot contextSnapshot;
+    private final Supplier<T> supplier;
+    private final TraceContextSnapshot contextSnapshot;
 
-    public SupplierWrapper(Supplier supplier, TraceContextSnapshot contextSnapshot) {
+    public SupplierWrapper(Supplier<T> supplier, TraceContextSnapshot contextSnapshot) {
         this.supplier = supplier;
         this.contextSnapshot = contextSnapshot;
     }

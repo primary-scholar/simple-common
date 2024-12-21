@@ -5,47 +5,35 @@ import com.mimu.common.trace.context.TraceContextSnapshot;
 import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 
-public class FunctionWrapper<T, R> implements Function<T, R> {
+public class BiConsumerWrapper<T, U> implements BiConsumer<T, U> {
 
-    private final Function<T, R> function;
+    private final BiConsumer<T, U> biConsumer;
     private final TraceContextSnapshot contextSnapshot;
 
-    public FunctionWrapper(Function<T, R> function, TraceContextSnapshot contextSnapshot) {
-        this.function = function;
+    public BiConsumerWrapper(BiConsumer<T, U> biConsumer, TraceContextSnapshot contextSnapshot) {
+        this.biConsumer = biConsumer;
         this.contextSnapshot = contextSnapshot;
     }
 
     @Override
-    public R apply(T t) {
+    public void accept(T t, U u) {
         TraceSpan localSpan = ContextManager.createLocalSpan(StringUtils.EMPTY);
         ContextManager.continued(contextSnapshot);
         try {
-            return function.apply(t);
+            biConsumer.accept(t, u);
         } finally {
             ContextManager.stopSpan();
         }
     }
 
     @Override
-    public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
+    public BiConsumer<T, U> andThen(BiConsumer<? super T, ? super U> after) {
         TraceSpan localSpan = ContextManager.createLocalSpan(StringUtils.EMPTY);
         ContextManager.continued(contextSnapshot);
         try {
-            return function.compose(before);
-        } finally {
-            ContextManager.stopSpan();
-        }
-
-    }
-
-    @Override
-    public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
-        TraceSpan localSpan = ContextManager.createLocalSpan(StringUtils.EMPTY);
-        ContextManager.continued(contextSnapshot);
-        try {
-            return function.andThen(after);
+            return biConsumer.andThen(after);
         } finally {
             ContextManager.stopSpan();
         }

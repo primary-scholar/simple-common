@@ -9,8 +9,8 @@ import java.util.function.Consumer;
 
 public class ConsumerWrapper<T> implements Consumer<T> {
 
-    private Consumer<T> consumer;
-    private TraceContextSnapshot contextSnapshot;
+    private final Consumer<T> consumer;
+    private final TraceContextSnapshot contextSnapshot;
 
     public ConsumerWrapper(Consumer<T> consumer, TraceContextSnapshot contextSnapshot) {
         this.consumer = consumer;

@@ -6,8 +6,8 @@ import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.StringUtils;
 
 public class RunnableWrapper implements Runnable {
-    private Runnable runnable;
-    private TraceContextSnapshot contextSnapshot;
+    private final Runnable runnable;
+    private final TraceContextSnapshot contextSnapshot;
 
     public RunnableWrapper(Runnable runnable, TraceContextSnapshot contextSnapshot) {
         this.runnable = runnable;
