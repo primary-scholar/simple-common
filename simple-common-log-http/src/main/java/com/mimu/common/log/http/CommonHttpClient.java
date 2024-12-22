@@ -2,8 +2,8 @@ package com.mimu.common.log.http;
 
 import com.alibaba.fastjson.JSONObject;
 import com.mimu.common.constants.NounConstant;
-import com.mimu.common.trace.context.ContextCarrier;
-import com.mimu.common.trace.context.ContextManager;
+import com.mimu.common.trace.context.TraceContextCarrier;
+import com.mimu.common.trace.context.TraceContextManager;
 import com.mimu.common.trace.span.TraceSpan;
 import com.mimu.common.util.RequestParamResolver;
 import lombok.Getter;
@@ -74,18 +74,18 @@ public class CommonHttpClient {
         HttpEntity entity = null;
         String result = StringUtils.EMPTY;
         try {
-            ContextCarrier contextCarrier = new ContextCarrier();
-            TraceSpan exitSpan = ContextManager.createExitSpan(StringUtils.EMPTY, contextCarrier, StringUtils.EMPTY);
-            extractCarrier(httpGet, contextCarrier);
+            TraceContextCarrier traceContextCarrier = new TraceContextCarrier();
+            TraceSpan exitSpan = TraceContextManager.createExitSpan(StringUtils.EMPTY, traceContextCarrier, StringUtils.EMPTY);
+            extractCarrier(httpGet, traceContextCarrier);
             fillSpanTag(httpGet, exitSpan);
             CloseableHttpResponse response = httpClient.execute(httpGet);
             entity = response.getEntity();
             if (Objects.nonNull(entity)) {
                 result = EntityUtils.toString(entity);
             }
-            TraceSpan traceSpan = ContextManager.activeSpan();
+            TraceSpan traceSpan = TraceContextManager.activeSpan();
             fillSpanTag(httpGet, result, traceSpan);
-            ContextManager.stopSpan();
+            TraceContextManager.stopSpan();
         } catch (IOException e) {
             IO.error("", e);
         } finally {
@@ -99,9 +99,9 @@ public class CommonHttpClient {
         String result = StringUtils.EMPTY;
         HttpEntity entity = null;
         try {
-            ContextCarrier contextCarrier = new ContextCarrier();
-            TraceSpan exitSpan = ContextManager.createExitSpan(StringUtils.EMPTY, contextCarrier, StringUtils.EMPTY);
-            extractCarrier(httpPost, contextCarrier);
+            TraceContextCarrier traceContextCarrier = new TraceContextCarrier();
+            TraceSpan exitSpan = TraceContextManager.createExitSpan(StringUtils.EMPTY, traceContextCarrier, StringUtils.EMPTY);
+            extractCarrier(httpPost, traceContextCarrier);
             fillSpanTag(httpPost, request, exitSpan);
             StringEntity param = new StringEntity(request, StandardCharsets.UTF_8);
             param.setContentType("application/json");
@@ -111,9 +111,9 @@ public class CommonHttpClient {
             if (Objects.nonNull(entity)) {
                 result = EntityUtils.toString(entity);
             }
-            TraceSpan traceSpan = ContextManager.activeSpan();
+            TraceSpan traceSpan = TraceContextManager.activeSpan();
             fillSpanTag(httpPost, request, traceSpan, result);
-            ContextManager.stopSpan();
+            TraceContextManager.stopSpan();
         } catch (Exception e) {
             IO.error("", e);
         } finally {
@@ -130,14 +130,14 @@ public class CommonHttpClient {
         private Integer socketTimeout = 3000;
     }
 
-    private void extractCarrier(HttpGet httpGet, ContextCarrier carrier) {
+    private void extractCarrier(HttpGet httpGet, TraceContextCarrier carrier) {
         Map<String, String> tags = carrier.tags();
         for (Map.Entry<String, String> next : tags.entrySet()) {
             httpGet.setHeader(next.getKey(), next.getValue());
         }
     }
 
-    private void extractCarrier(HttpPost httpPost, ContextCarrier carrier) {
+    private void extractCarrier(HttpPost httpPost, TraceContextCarrier carrier) {
         Map<String, String> tags = carrier.tags();
         for (Map.Entry<String, String> next : tags.entrySet()) {
             httpPost.setHeader(next.getKey(), next.getValue());

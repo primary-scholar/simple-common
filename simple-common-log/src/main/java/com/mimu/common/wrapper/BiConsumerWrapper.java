@@ -1,6 +1,6 @@
 package com.mimu.common.wrapper;
 
-import com.mimu.common.trace.context.ContextManager;
+import com.mimu.common.trace.context.TraceContextManager;
 import com.mimu.common.trace.context.TraceContextSnapshot;
 import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.StringUtils;
@@ -19,23 +19,23 @@ public class BiConsumerWrapper<T, U> implements BiConsumer<T, U> {
 
     @Override
     public void accept(T t, U u) {
-        TraceSpan localSpan = ContextManager.createLocalSpan(StringUtils.EMPTY);
-        ContextManager.continued(contextSnapshot);
+        TraceSpan localSpan = TraceContextManager.createLocalSpan(StringUtils.EMPTY);
+        TraceContextManager.continued(contextSnapshot);
         try {
             biConsumer.accept(t, u);
         } finally {
-            ContextManager.stopSpan();
+            TraceContextManager.stopSpan();
         }
     }
 
     @Override
     public BiConsumer<T, U> andThen(BiConsumer<? super T, ? super U> after) {
-        TraceSpan localSpan = ContextManager.createLocalSpan(StringUtils.EMPTY);
-        ContextManager.continued(contextSnapshot);
+        TraceSpan localSpan = TraceContextManager.createLocalSpan(StringUtils.EMPTY);
+        TraceContextManager.continued(contextSnapshot);
         try {
             return biConsumer.andThen(after);
         } finally {
-            ContextManager.stopSpan();
+            TraceContextManager.stopSpan();
         }
     }
 }

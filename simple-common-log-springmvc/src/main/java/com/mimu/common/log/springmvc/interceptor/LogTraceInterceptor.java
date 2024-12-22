@@ -3,8 +3,8 @@ package com.mimu.common.log.springmvc.interceptor;
 
 import com.alibaba.fastjson.JSONObject;
 import com.mimu.common.constants.*;
-import com.mimu.common.trace.context.ContextCarrier;
-import com.mimu.common.trace.context.ContextManager;
+import com.mimu.common.trace.context.TraceContextCarrier;
+import com.mimu.common.trace.context.TraceContextManager;
 import com.mimu.common.trace.span.TraceSpan;
 import com.mimu.common.util.RequestParamResolver;
 import org.apache.commons.lang3.StringUtils;
@@ -35,9 +35,9 @@ public class LogTraceInterceptor implements HandlerInterceptor {
         try {
             request.setCharacterEncoding(StandardCharsets.UTF_8.name());
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            ContextCarrier contextCarrier = new ContextCarrier();
-            fillCarrier(request, contextCarrier);
-            TraceSpan entrySpan = ContextManager.createEntrySpan(StringUtils.EMPTY, contextCarrier);
+            TraceContextCarrier traceContextCarrier = new TraceContextCarrier();
+            fillCarrier(request, traceContextCarrier);
+            TraceSpan entrySpan = TraceContextManager.createEntrySpan(StringUtils.EMPTY, traceContextCarrier);
             fillSpanTag(request, entrySpan);
         } catch (UnsupportedEncodingException e) {
         }
@@ -48,9 +48,9 @@ public class LogTraceInterceptor implements HandlerInterceptor {
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
                            ModelAndView modelAndView) throws Exception {
         try {
-            TraceSpan traceSpan = ContextManager.activeSpan();
+            TraceSpan traceSpan = TraceContextManager.activeSpan();
             fillSpanTag(request, response, traceSpan);
-            ContextManager.stopSpan();
+            TraceContextManager.stopSpan();
         } catch (Exception e) {
         }
     }
@@ -116,7 +116,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
         return StringUtils.EMPTY;
     }
 
-    private void fillCarrier(HttpServletRequest request, ContextCarrier carrier) {
+    private void fillCarrier(HttpServletRequest request, TraceContextCarrier carrier) {
         Map<String, String> tags = carrier.emptyTags();
         tags.replaceAll((k, v) -> request.getHeader(k));
         Map<String, Object> parameter = getParameter(request);
@@ -126,7 +126,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
                 Object requestId = parameter.get(NounConstant.REQUEST_ID);
                 traceId = Objects.isNull(requestId) ? StringUtils.EMPTY : requestId.toString();
             }
-            carrier.setTraceId(ContextManager.createDistributedId(traceId));
+            carrier.setTraceId(TraceContextManager.createDistributedId(traceId));
         }
         if (Objects.isNull(carrier.getParentSpanId())) {
             String parentSpanId = tags.get(NounConstant.PARENT_SPAN_ID);

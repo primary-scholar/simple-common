@@ -23,7 +23,8 @@ public class TraceContextSnapshot {
     }
 
     public Boolean isFromCurrent() {
-        return Objects.nonNull(traceSegmentId) && traceSegmentId.equals(ContextManager.capture().getTraceSegmentId());
+        TraceContext traceContext = TraceContextManager.get();
+        return Objects.nonNull(traceSegmentId) && traceSegmentId.equals(traceContext.getTraceSegment().getTraceSegmentId());
     }
 
 }

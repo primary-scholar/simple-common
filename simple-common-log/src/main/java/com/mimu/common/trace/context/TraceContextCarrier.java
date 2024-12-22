@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.Serializable;
 import java.util.*;
 
-public class ContextCarrier implements Serializable {
+public class TraceContextCarrier implements Serializable {
     private DistributedId traceId;
     private Integer parentSpanId;
     private Integer spanId;

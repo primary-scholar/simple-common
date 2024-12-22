@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
-public class ContextManager {
+public class TraceContextManager {
 
     private static final ThreadLocal<TraceContext> CONTEXT = new ThreadLocal<>();
 
@@ -19,7 +19,7 @@ public class ContextManager {
         return context;
     }
 
-    private static TraceContext get() {
+    public static TraceContext get() {
         return CONTEXT.get();
     }
 
@@ -30,7 +30,7 @@ public class ContextManager {
         return new DistributedId(id);
     }
 
-    public static TraceSpan createEntrySpan(String operationName, ContextCarrier carrier) {
+    public static TraceSpan createEntrySpan(String operationName, TraceContextCarrier carrier) {
         TraceContext context = getOrCreateContext();
         TraceSpan entrySpan = context.createEntrySpan(operationName);
         if (Objects.nonNull(carrier) && carrier.isValid()) {
@@ -39,7 +39,7 @@ public class ContextManager {
         return entrySpan;
     }
 
-    public static TraceSpan createExitSpan(String operationName, ContextCarrier carrier, String peer) {
+    public static TraceSpan createExitSpan(String operationName, TraceContextCarrier carrier, String peer) {
         TraceContext context = getOrCreateContext();
         if (Objects.isNull(context)) {
             throw new IllegalStateException("context is null");

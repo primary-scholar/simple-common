@@ -1,6 +1,6 @@
 package com.mimu.common.wrapper;
 
-import com.mimu.common.trace.context.ContextManager;
+import com.mimu.common.trace.context.TraceContextManager;
 import com.mimu.common.trace.context.TraceContextSnapshot;
 import com.mimu.common.trace.span.TraceSpan;
 import org.apache.commons.lang3.StringUtils;
@@ -19,12 +19,12 @@ public class ConsumerWrapper<T> implements Consumer<T> {
 
     @Override
     public void accept(T t) {
-        TraceSpan localSpan = ContextManager.createLocalSpan(StringUtils.EMPTY);
-        ContextManager.continued(contextSnapshot);
+        TraceSpan localSpan = TraceContextManager.createLocalSpan(StringUtils.EMPTY);
+        TraceContextManager.continued(contextSnapshot);
         try {
             consumer.accept(t);
         } finally {
-            ContextManager.stopSpan();
+            TraceContextManager.stopSpan();
         }
     }
 }
