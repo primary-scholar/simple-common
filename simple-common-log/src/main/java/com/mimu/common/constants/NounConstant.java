@@ -7,8 +7,8 @@ public class NounConstant {
     public static final String COLON = ":";
 
     public static final String TRACE_ID = "_TRACE_ID_";
-    public static final String PARENT_SPAN_SEQUENCE_ID = "_PARENT_SPAN_SEQUENCE_ID_";
-    public static final String SPAN_SEQUENCE_ID = "_SPAN_SEQUENCE_ID_";
+    public static final String PARENT_SPAN_ID = "_PARENT_SPAN_ID_";
+    public static final String SPAN_ID = "_SPAN_ID_";
     public static final String START_TIME = "_START_TIME_";
     public static final String COST = "_COST_";
     public static final String URI = "_URI_";
@@ -22,6 +22,6 @@ public class NounConstant {
     public static final String CID = "cid";
     public static final String CID_P1 = "p1";
 
-    public static final Integer DEFAULT_PARENT_SPAN_SEQUENCE_ID = NumberUtils.INTEGER_MINUS_ONE;
-    public static final Integer DEFAULT_SPAN_SEQUENCE_ID = NumberUtils.INTEGER_ZERO;
+    public static final Integer DEFAULT_PARENT_SPAN_ID = NumberUtils.INTEGER_ZERO;
+    public static final Integer DEFAULT_SPAN_ID = NumberUtils.INTEGER_ZERO;
 }

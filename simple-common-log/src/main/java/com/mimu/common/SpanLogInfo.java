@@ -1,11 +1,10 @@
 package com.mimu.common;
 
 import com.mimu.common.constants.NounConstant;
-import com.mimu.common.trace.Tracer;
+import com.mimu.common.trace.TraceSegment;
 import com.mimu.common.trace.span.TraceSpan;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.Serializable;
@@ -25,15 +24,14 @@ public class SpanLogInfo implements Serializable {
     private String request;
     private String response;
 
-    public SpanLogInfo(TraceSpan span) {
+    public SpanLogInfo(TraceSpan span, TraceSegment traceSegment) {
         if (Objects.isNull(span)) {
             return;
         }
         Map<String, String> tags = span.getTags();
-        Tracer tracer = span.getTracer();
-        this.traceId = Objects.isNull(tracer) ? StringUtils.EMPTY : tracer.getTraceId().getId();
-        this.parentSpanId = span.getParentSpanSequenceId();
-        this.spanId = span.getSpanSequenceId();
+        this.traceId = traceSegment.getGlobalTraceId().getId();
+        this.parentSpanId = span.getParentSpanId();
+        this.spanId = span.getSpanId();
         this.cid = NumberUtils.toLong(tags.get(NounConstant.CID));
         this.remoteInterface = tags.get(NounConstant.URI);
         this.starTime = span.getStartTime();

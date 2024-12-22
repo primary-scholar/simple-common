@@ -1,11 +1,10 @@
 package com.mimu.common.trace.span;
 
-import com.mimu.common.trace.Tracer;
 
 public class LocalSpan extends TraceSpan {
 
-    public LocalSpan(Tracer tracer, Integer parentSpanSequenceId, Integer spanSequenceId, String spanName) {
-        super(tracer, parentSpanSequenceId, spanSequenceId, spanName);
+    public LocalSpan(Integer parentSpanId, Integer spanId, String spanName) {
+        super(parentSpanId, spanId, spanName);
     }
 
     @Override

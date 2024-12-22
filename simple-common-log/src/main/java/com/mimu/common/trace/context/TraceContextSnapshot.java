@@ -8,24 +8,22 @@ import java.util.Objects;
 
 @Getter
 public class TraceContextSnapshot {
-    private DistributedId traceId;
-    private DistributedId spanId;
-    private Integer parentSpanSequenceId;
-    private Integer spanSequenceId;
+    private final DistributedId globalTraceId;
+    private final String traceSegmentId;
+    private final Integer spanId;
 
-    public TraceContextSnapshot(DistributedId traceId, DistributedId spanId, Integer parentSpanSequenceId, Integer spanSequenceId) {
-        this.traceId = traceId;
+    public TraceContextSnapshot(DistributedId globalTraceId, String traceSegmentId, Integer spanId) {
+        this.globalTraceId = globalTraceId;
+        this.traceSegmentId = traceSegmentId;
         this.spanId = spanId;
-        this.parentSpanSequenceId = parentSpanSequenceId;
-        this.spanSequenceId = spanSequenceId;
     }
 
     public Boolean isValid() {
-        return Objects.nonNull(traceId) && Objects.nonNull(spanId) && Objects.nonNull(spanSequenceId);
+        return Objects.nonNull(globalTraceId) && Objects.nonNull(traceSegmentId) && Objects.nonNull(spanId);
     }
 
     public Boolean isFromCurrent() {
-        return Objects.nonNull(spanId) && spanId.equals(ContextManager.capture().getSpanId());
+        return Objects.nonNull(traceSegmentId) && traceSegmentId.equals(ContextManager.capture().getTraceSegmentId());
     }
 
 }

@@ -54,6 +54,10 @@ public class ContextManager {
         return context.createLocalSpan(operationName);
     }
 
+    public static TraceContextSnapshot capture() {
+        return get().capture();
+    }
+
     public static void continued(TraceContextSnapshot contextSnapshot) {
         if (Objects.isNull(contextSnapshot)) {
             throw new IllegalStateException("context snapshot is null");
@@ -63,10 +67,6 @@ public class ContextManager {
                 get().continued(contextSnapshot);
             }
         }
-    }
-
-    public static TraceContextSnapshot capture() {
-        return get().capture();
     }
 
     public static TraceSpan activeSpan() {
