@@ -63,15 +63,36 @@ public class LogTraceInterceptor implements HandlerInterceptor {
 
     }
 
+    private String getQueryString(HttpServletRequest request) {
+        String queryString = StringUtils.EMPTY;
+        try {
+            if (request instanceof ContentCachingRequestWrapper) {
+                ContentCachingRequestWrapper requestWrapper = (ContentCachingRequestWrapper) request;
+                queryString = URLDecoder.decode(requestWrapper.getQueryString(), requestWrapper.getCharacterEncoding());
+            } else {
+                queryString = URLDecoder.decode(request.getQueryString(), request.getCharacterEncoding());
+            }
+        } catch (UnsupportedEncodingException e) {
+            IO.error("", e);
+        }
+        return queryString;
+    }
+
     private Map<String, Object> getParameter(HttpServletRequest request) {
-        String requestStr = getRequest(request);
+        String queryString = getQueryString(request);
         if (HttpMethod.GET.equals(HttpMethod.resolve(request.getMethod()))) {
-            return RequestParamResolver.decodeParams(requestStr);
+            return RequestParamResolver.decodeParams(queryString);
         }
         if (HttpMethod.POST.equals(HttpMethod.resolve(request.getMethod()))) {
-            JSONObject parsed = JSONObject.parseObject(requestStr);
-            RequestParamResolver.fillCidParam(parsed);
-            return Objects.isNull(parsed) ? Collections.emptyMap() : parsed;
+            Map<String, Object> urlParam = RequestParamResolver.decodeParams(queryString);
+            String postQuery = getRequest(request);
+            JSONObject postQueryParam = JSONObject.parseObject(postQuery);
+            if (Objects.isNull(postQueryParam)) {
+                postQueryParam = new JSONObject();
+            }
+            postQueryParam.putAll(urlParam);
+            RequestParamResolver.fillCidParam(postQueryParam);
+            return Objects.isNull(postQueryParam) ? Collections.emptyMap() : postQueryParam;
         }
         return Collections.emptyMap();
     }
@@ -140,8 +161,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
                     parentSpanId = String.valueOf(NounConstant.DEFAULT_PARENT_SPAN_ID);
                 }
             }
-            carrier.setParentSpanId(NumberUtils.toInt(parentSpanId,
-                    NounConstant.DEFAULT_PARENT_SPAN_ID));
+            carrier.setParentSpanId(NumberUtils.toInt(parentSpanId, NounConstant.DEFAULT_PARENT_SPAN_ID));
         }
         if (Objects.isNull(carrier.getSpanId())) {
             String spanId = tags.get(NounConstant.SPAN_ID);
@@ -161,6 +181,9 @@ public class LogTraceInterceptor implements HandlerInterceptor {
         Map<String, String> tags = span.getTags();
         if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
             span.addTag(NounConstant.URI, request.getRequestURI());
+        }
+        if (StringUtils.isEmpty(tags.get(NounConstant.QUERY))) {
+            span.addTag(NounConstant.QUERY, getQueryString(request));
         }
         if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
             span.addTag(NounConstant.REQUEST, getRequest(request));

@@ -17,10 +17,11 @@ public class SpanLogInfo implements Serializable {
     private String traceId;
     private Integer parentSpanId;
     private Integer spanId;
-    private Long cid;
-    private String remoteInterface;
     private Long starTime;
+    private Long cid;
     private Integer cost;
+    private String remoteInterface;
+    private String query;
     private String request;
     private String response;
 
@@ -32,10 +33,11 @@ public class SpanLogInfo implements Serializable {
         this.traceId = traceSegment.getGlobalTraceId().getId();
         this.parentSpanId = span.getParentSpanId();
         this.spanId = span.getSpanId();
-        this.cid = NumberUtils.toLong(tags.get(NounConstant.CID));
-        this.remoteInterface = tags.get(NounConstant.URI);
         this.starTime = span.getStartTime();
+        this.cid = NumberUtils.toLong(tags.get(NounConstant.CID));
         this.cost = Math.toIntExact(span.getEndTime() - span.getStartTime());
+        this.remoteInterface = tags.get(NounConstant.URI);
+        this.query = tags.get(NounConstant.QUERY);
         this.request = tags.get(NounConstant.REQUEST);
         this.response = tags.get(NounConstant.RESPONSE);
     }

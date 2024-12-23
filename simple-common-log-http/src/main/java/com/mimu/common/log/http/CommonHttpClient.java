@@ -165,8 +165,11 @@ public class CommonHttpClient {
             path = request.substring(httpSlash + HttpNounConstant.HTTP_SLASH.length());
         }
         int slashIndex = path.indexOf(HttpNounConstant.SLASH);
+        int questionIndex = path.indexOf(HttpNounConstant.QUESTION);
         if (slashIndex > NumberUtils.INTEGER_MINUS_ONE) {
-            path = path.substring(slashIndex + HttpNounConstant.SLASH.length());
+            if (questionIndex > NumberUtils.INTEGER_MINUS_ONE) {
+                path = path.substring(slashIndex + HttpNounConstant.SLASH.length(), questionIndex);
+            }
         }
         return path;
     }
@@ -176,7 +179,7 @@ public class CommonHttpClient {
         String request = getRequest(uri);
         int questionIndex = request.indexOf(HttpNounConstant.QUESTION);
         if (questionIndex > NumberUtils.INTEGER_MINUS_ONE) {
-            query = request.substring(questionIndex + HttpNounConstant.HTTP_SLASH.length());
+            query = request.substring(questionIndex + HttpNounConstant.QUESTION.length());
         }
         return query;
     }
@@ -186,6 +189,9 @@ public class CommonHttpClient {
         String string = httpGet.getURI().toString();
         if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
             span.addTag(NounConstant.URI, getRequestPath(string));
+        }
+        if (StringUtils.isEmpty(tags.get(NounConstant.QUERY))) {
+            span.addTag(NounConstant.QUERY, getRequestQuery(string));
         }
         if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
             span.addTag(NounConstant.REQUEST, getRequestQuery(string));
@@ -210,6 +216,9 @@ public class CommonHttpClient {
         String uri = httpPost.getURI().toString();
         if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
             span.addTag(NounConstant.URI, getRequestPath(uri));
+        }
+        if (StringUtils.isEmpty(tags.get(NounConstant.QUERY))) {
+            span.addTag(NounConstant.QUERY, getRequestQuery(uri));
         }
         if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
             span.addTag(NounConstant.REQUEST, request);

@@ -10,6 +10,7 @@ public class NounConstant {
     public static final String START_TIME = "_START_TIME_";
     public static final String COST = "_COST_";
     public static final String URI = "_URI_";
+    public static final String QUERY = "_QUERY_";
     public static final String REQUEST = "_REQUEST_";
     public static final String RESPONSE = "_RESPONSE_";
 

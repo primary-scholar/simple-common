@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CalculateRpcLocalHttpService extends AbstractCalculateService {
     private static final String RPC_GET_URL = "http://localhost:8080/api/num/gen?number=%s&p1=%s";
-    private static final String RPC_POST_URL = "http://localhost:8080/api/num/cal";
+    private static final String RPC_POST_URL = "http://localhost:8080/api/num/cal?abc=abc";
 
     @Autowired
     private CommonHttpClient commonHttpClient;

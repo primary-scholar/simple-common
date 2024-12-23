@@ -34,7 +34,8 @@ public class TraceContext {
             entrySpan = parentSpan;
             entrySpan.start();
         } else {
-            Integer parentSpanId = Objects.isNull(parentSpan) ? NounConstant.DEFAULT_PARENT_SPAN_ID : parentSpan.getParentSpanId();
+            Integer parentSpanId = Objects.isNull(parentSpan) ? NounConstant.DEFAULT_PARENT_SPAN_ID :
+                    parentSpan.getParentSpanId();
             entrySpan = new EntrySpan(parentSpanId++, getTraceSegment().getSpanIdAndPlus(), operationName);
             entrySpan.start();
             push(entrySpan);
@@ -56,7 +57,8 @@ public class TraceContext {
         if (Objects.nonNull(parentSpan) && parentSpan.isExit()) {
             exitSpan = parentSpan;
         } else {
-            Integer parentSpanId = Objects.isNull(parentSpan) ? NounConstant.DEFAULT_PARENT_SPAN_ID : parentSpan.getParentSpanId();
+            Integer parentSpanId = Objects.isNull(parentSpan) ? NounConstant.DEFAULT_PARENT_SPAN_ID :
+                    parentSpan.getParentSpanId();
             exitSpan = new ExitSpan(parentSpanId++, getTraceSegment().getSpanIdAndPlus(), operationName);
             push(exitSpan);
         }
@@ -75,7 +77,8 @@ public class TraceContext {
     public TraceSpan createLocalSpan(String operationName) {
         TraceSpan localSpan;
         TraceSpan parentSpan = peek();
-        Integer parentSpanId = Objects.isNull(parentSpan) ? NounConstant.DEFAULT_PARENT_SPAN_ID : parentSpan.getParentSpanId();
+        Integer parentSpanId = Objects.isNull(parentSpan) ? NounConstant.DEFAULT_PARENT_SPAN_ID :
+                parentSpan.getParentSpanId();
         localSpan = new LocalSpan(parentSpanId++, getTraceSegment().getSpanIdAndPlus(), operationName);
         localSpan.start();
         return push(localSpan);
@@ -83,7 +86,8 @@ public class TraceContext {
 
     public TraceContextSnapshot capture() {
         TraceSegment traceSegment = getTraceSegment();
-        return new TraceContextSnapshot(traceSegment.getGlobalTraceId(), traceSegment.getTraceSegmentId(), traceSegment.getSpanIdAndPlus());
+        return new TraceContextSnapshot(traceSegment.getGlobalTraceId(), traceSegment.getTraceSegmentId(),
+                traceSegment.getSpanIdAndPlus());
     }
 
     public void continued(TraceContextSnapshot contextSnapshot) {
@@ -142,6 +146,7 @@ public class TraceContext {
         MDC.put(NounConstant.URI, spanLogInfo.getRemoteInterface());
         MDC.put(NounConstant.START_TIME, String.valueOf(spanLogInfo.getStarTime()));
         MDC.put(NounConstant.COST, String.valueOf(spanLogInfo.getCost()));
+        MDC.put(NounConstant.QUERY, spanLogInfo.getQuery());
         MDC.put(NounConstant.REQUEST, spanLogInfo.getRequest());
         MDC.put(NounConstant.RESPONSE, spanLogInfo.getResponse());
         IO.info("");
@@ -152,6 +157,7 @@ public class TraceContext {
         MDC.remove(NounConstant.URI);
         MDC.remove(NounConstant.START_TIME);
         MDC.remove(NounConstant.COST);
+        MDC.remove(NounConstant.QUERY);
         MDC.remove(NounConstant.REQUEST);
         MDC.remove(NounConstant.RESPONSE);
     }
