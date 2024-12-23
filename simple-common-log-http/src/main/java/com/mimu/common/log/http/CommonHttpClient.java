@@ -1,6 +1,7 @@
 package com.mimu.common.log.http;
 
 import com.alibaba.fastjson.JSONObject;
+import com.mimu.common.constants.HttpNounConstant;
 import com.mimu.common.constants.NounConstant;
 import com.mimu.common.trace.context.TraceContextCarrier;
 import com.mimu.common.trace.context.TraceContextManager;
@@ -75,7 +76,8 @@ public class CommonHttpClient {
         String result = StringUtils.EMPTY;
         try {
             TraceContextCarrier traceContextCarrier = new TraceContextCarrier();
-            TraceSpan exitSpan = TraceContextManager.createExitSpan(StringUtils.EMPTY, traceContextCarrier, StringUtils.EMPTY);
+            TraceSpan exitSpan = TraceContextManager.createExitSpan(StringUtils.EMPTY, traceContextCarrier,
+                    StringUtils.EMPTY);
             extractCarrier(httpGet, traceContextCarrier);
             fillSpanTag(httpGet, exitSpan);
             CloseableHttpResponse response = httpClient.execute(httpGet);
@@ -94,16 +96,17 @@ public class CommonHttpClient {
         return result;
     }
 
-    private String requestByPost(String url, String request) throws IOException {
+    private String requestByPost(String url, String query) throws IOException {
         HttpPost httpPost = new HttpPost(url);
         String result = StringUtils.EMPTY;
         HttpEntity entity = null;
         try {
             TraceContextCarrier traceContextCarrier = new TraceContextCarrier();
-            TraceSpan exitSpan = TraceContextManager.createExitSpan(StringUtils.EMPTY, traceContextCarrier, StringUtils.EMPTY);
+            TraceSpan exitSpan = TraceContextManager.createExitSpan(StringUtils.EMPTY, traceContextCarrier,
+                    StringUtils.EMPTY);
             extractCarrier(httpPost, traceContextCarrier);
-            fillSpanTag(httpPost, request, exitSpan);
-            StringEntity param = new StringEntity(request, StandardCharsets.UTF_8);
+            fillSpanTag(httpPost, query, exitSpan);
+            StringEntity param = new StringEntity(query, StandardCharsets.UTF_8);
             param.setContentType("application/json");
             httpPost.setEntity(param);
             CloseableHttpResponse response = httpClient.execute(httpPost);
@@ -112,7 +115,7 @@ public class CommonHttpClient {
                 result = EntityUtils.toString(entity);
             }
             TraceSpan traceSpan = TraceContextManager.activeSpan();
-            fillSpanTag(httpPost, request, traceSpan, result);
+            fillSpanTag(httpPost, query, traceSpan, result);
             TraceContextManager.stopSpan();
         } catch (Exception e) {
             IO.error("", e);
@@ -144,26 +147,52 @@ public class CommonHttpClient {
         }
     }
 
-    private String getRequest(HttpGet httpGet) {
+    private String getRequest(String uri) {
         String param = StringUtils.EMPTY;
         try {
-            param = URLDecoder.decode(httpGet.getURI().toString(), StandardCharsets.UTF_8.name());
+            param = URLDecoder.decode(uri, StandardCharsets.UTF_8.name());
         } catch (Exception e) {
+            IO.error("", e);
         }
         return param;
     }
 
+    private String getRequestPath(String uri) {
+        String path = StringUtils.EMPTY;
+        String request = getRequest(uri);
+        int httpSlash = request.indexOf(HttpNounConstant.HTTP_SLASH);
+        if (httpSlash > NumberUtils.INTEGER_MINUS_ONE) {
+            path = request.substring(httpSlash + HttpNounConstant.HTTP_SLASH.length());
+        }
+        int slashIndex = path.indexOf(HttpNounConstant.SLASH);
+        if (slashIndex > NumberUtils.INTEGER_MINUS_ONE) {
+            path = path.substring(slashIndex + HttpNounConstant.SLASH.length());
+        }
+        return path;
+    }
+
+    private String getRequestQuery(String uri) {
+        String query = StringUtils.EMPTY;
+        String request = getRequest(uri);
+        int questionIndex = request.indexOf(HttpNounConstant.QUESTION);
+        if (questionIndex > NumberUtils.INTEGER_MINUS_ONE) {
+            query = request.substring(questionIndex + HttpNounConstant.HTTP_SLASH.length());
+        }
+        return query;
+    }
+
     private void fillSpanTag(HttpGet httpGet, TraceSpan span) {
         Map<String, String> tags = span.getTags();
+        String string = httpGet.getURI().toString();
         if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
-            span.addTag(NounConstant.URI, getRequest(httpGet));
+            span.addTag(NounConstant.URI, getRequestPath(string));
         }
         if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
-            span.addTag(NounConstant.REQUEST, getRequest(httpGet));
+            span.addTag(NounConstant.REQUEST, getRequestQuery(string));
         }
         String tagCid = tags.get(NounConstant.CID);
         if (StringUtils.isEmpty(tagCid) || NumberUtils.toLong(tagCid) <= NumberUtils.LONG_ZERO) {
-            Map<String, Object> params = RequestParamResolver.decodeParams(getRequest(httpGet));
+            Map<String, Object> params = RequestParamResolver.decodeParams(getRequest(httpGet.getURI().toString()));
             span.addTag(NounConstant.CID, params.getOrDefault(NounConstant.CID, NumberUtils.LONG_ZERO).toString());
         }
     }
@@ -178,8 +207,9 @@ public class CommonHttpClient {
 
     private void fillSpanTag(HttpPost httpPost, String request, TraceSpan span) {
         Map<String, String> tags = span.getTags();
+        String uri = httpPost.getURI().toString();
         if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
-            span.addTag(NounConstant.URI, httpPost.getURI().toString());
+            span.addTag(NounConstant.URI, getRequestPath(uri));
         }
         if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
             span.addTag(NounConstant.REQUEST, request);

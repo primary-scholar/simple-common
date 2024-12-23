@@ -3,8 +3,6 @@ package com.mimu.common.constants;
 import org.apache.commons.lang3.math.NumberUtils;
 
 public class NounConstant {
-    public static final String QUESTION = "?";
-    public static final String COLON = ":";
 
     public static final String TRACE_ID = "_TRACE_ID_";
     public static final String PARENT_SPAN_ID = "_PARENT_SPAN_ID_";

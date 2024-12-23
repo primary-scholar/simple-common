@@ -40,6 +40,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
             TraceSpan entrySpan = TraceContextManager.createEntrySpan(StringUtils.EMPTY, traceContextCarrier);
             fillSpanTag(request, entrySpan);
         } catch (UnsupportedEncodingException e) {
+            IO.error("", e);
         }
         return Boolean.TRUE;
     }
@@ -52,6 +53,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
             fillSpanTag(request, response, traceSpan);
             TraceContextManager.stopSpan();
         } catch (Exception e) {
+            IO.error("", e);
         }
     }
 
@@ -97,6 +99,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
                 param = JSONObject.toJSONString(parameter);
             }
         } catch (UnsupportedEncodingException e) {
+            IO.error("", e);
         }
         return param;
     }
@@ -112,6 +115,7 @@ public class LogTraceInterceptor implements HandlerInterceptor {
                 return responseStr;
             }
         } catch (UnsupportedEncodingException e) {
+            IO.error("", e);
         }
         return StringUtils.EMPTY;
     }
