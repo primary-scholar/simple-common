@@ -2,14 +2,18 @@ package com.mimu.common.trace.context;
 
 import com.mimu.common.constants.NounConstant;
 import com.mimu.common.trace.id.DistributedId;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.*;
 
 public class TraceContextCarrier implements Serializable {
+    @Getter
     private DistributedId traceId;
+    @Getter
     private Integer parentSpanId;
+    @Getter
     private Integer spanId;
     private final Map<String, String> tagValueMap = new HashMap<>();
 
@@ -29,26 +33,14 @@ public class TraceContextCarrier implements Serializable {
     }
 
 
-    public DistributedId getTraceId() {
-        return traceId;
-    }
-
     public void setTraceId(DistributedId traceId) {
         this.traceId = traceId;
         this.tagValueMap.put(NounConstant.TRACE_ID, Objects.isNull(traceId) ? StringUtils.EMPTY : traceId.getId());
     }
 
-    public Integer getSpanId() {
-        return spanId;
-    }
-
     public void setSpanId(Integer spanId) {
         this.spanId = spanId;
         this.tagValueMap.put(NounConstant.SPAN_ID, String.valueOf(spanId));
-    }
-
-    public Integer getParentSpanId() {
-        return parentSpanId;
     }
 
     public void setParentSpanId(Integer parentSpanId) {

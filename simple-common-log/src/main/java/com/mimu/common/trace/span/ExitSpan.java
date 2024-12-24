@@ -6,7 +6,6 @@ public class ExitSpan extends TraceSpan {
         super(parentSpanId, spanId, spanName);
     }
 
-
     @Override
     public Boolean isEntry() {
         return Boolean.FALSE;
