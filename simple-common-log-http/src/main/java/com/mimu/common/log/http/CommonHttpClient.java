@@ -85,13 +85,13 @@ public class CommonHttpClient {
             if (Objects.nonNull(entity)) {
                 result = EntityUtils.toString(entity);
             }
-            TraceSpan traceSpan = TraceContextManager.activeSpan();
-            fillSpanTag(httpGet, result, traceSpan);
-            TraceContextManager.stopSpan();
         } catch (IOException e) {
             IO.error("", e);
         } finally {
             EntityUtils.consume(entity);
+            TraceSpan traceSpan = TraceContextManager.activeSpan();
+            fillSpanTag(httpGet, result, traceSpan);
+            TraceContextManager.stopSpan();
         }
         return result;
     }
@@ -114,13 +114,13 @@ public class CommonHttpClient {
             if (Objects.nonNull(entity)) {
                 result = EntityUtils.toString(entity);
             }
-            TraceSpan traceSpan = TraceContextManager.activeSpan();
-            fillSpanTag(httpPost, query, traceSpan, result);
-            TraceContextManager.stopSpan();
         } catch (Exception e) {
             IO.error("", e);
         } finally {
             EntityUtils.consume(entity);
+            TraceSpan traceSpan = TraceContextManager.activeSpan();
+            fillSpanTag(httpPost, query, traceSpan, result);
+            TraceContextManager.stopSpan();
         }
         return result;
     }

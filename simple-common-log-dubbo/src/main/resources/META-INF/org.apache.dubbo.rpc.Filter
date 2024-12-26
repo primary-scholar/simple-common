@@ -1,0 +1,2 @@
+providertrace=com.mimu.common.log.dubbo.ProviderTraceFilter
+consumertrace=com.mimu.common.log.dubbo.ConsumerTraceFilter

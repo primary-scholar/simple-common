@@ -17,10 +17,11 @@
     <url>http://maven.apache.org</url>
     <modules>
         <module>simple-common-log</module>
-        <module>simple-common-dubbo</module>
         <module>simple-common-log-springmvc</module>
         <module>simple-common-log-http</module>
-        <module>simple-common-log-test</module>
+        <module>simple-common-log-dubbo-test</module>
+        <module>simple-common-log-dubbo</module>
+        <module>simple-common-log-springmvc-test</module>
     </modules>
 
     <properties>
