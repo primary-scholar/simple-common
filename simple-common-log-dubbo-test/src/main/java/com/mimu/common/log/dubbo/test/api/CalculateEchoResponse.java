@@ -8,6 +8,6 @@ import java.io.Serializable;
 @Setter
 @Getter
 public class CalculateEchoResponse implements Serializable {
-    private String result;
+    private Integer result;
     private String message;
 }
