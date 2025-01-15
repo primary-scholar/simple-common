@@ -1,0 +1,50 @@
+package com.mimu.common.log.dubbo.provider.test.config;
+
+import com.mimu.common.log.dubbo.test.api.CalculateEchoService;
+import org.apache.dubbo.config.ApplicationConfig;
+import org.apache.dubbo.config.ProtocolConfig;
+import org.apache.dubbo.config.ProviderConfig;
+import org.apache.dubbo.config.RegistryConfig;
+import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
+import org.apache.dubbo.config.spring.context.annotation.EnableDubboConfig;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@EnableDubbo(scanBasePackageClasses = CalculateEchoService.class)
+@EnableDubboConfig
+public class CalculateProviderApplicationConfig {
+
+    @Bean
+    public ApplicationConfig applicationConfig() {
+        ApplicationConfig applicationConfig = new ApplicationConfig();
+        applicationConfig.setName("calculateApplicationConfig");
+        return applicationConfig;
+    }
+
+    @Bean
+    public RegistryConfig registryConfig() {
+        RegistryConfig registryConfig = new RegistryConfig();
+        registryConfig.setProtocol("zookeeper");
+        registryConfig.setAddress("127.0.0.1:2181");
+        return registryConfig;
+    }
+
+    @Bean
+    public ProtocolConfig protocolConfig() {
+        ProtocolConfig protocolConfig = new ProtocolConfig();
+        protocolConfig.setName("dubbo");
+        protocolConfig.setPort(20880);
+        protocolConfig.setThreads(10);
+        protocolConfig.setDispatcher("dispatcher");
+        return protocolConfig;
+    }
+
+    @Bean
+    public ProviderConfig providerConfig() {
+        ProviderConfig providerConfig = new ProviderConfig();
+        providerConfig.setRegistry(registryConfig());
+        providerConfig.setTimeout(3000);
+        return providerConfig;
+    }
+}
