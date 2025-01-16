@@ -53,7 +53,7 @@
     </Appenders>
 
     <Loggers>
-        <logger name="org.springframework" level="info" additivity="true"/>
+        <logger name="org.springframework" level="INFO" additivity="true"/>
         <logger name="IO" level="INFO" additivity="true">
             <appender-ref ref="IORollingFileInfo"/>
         </logger>

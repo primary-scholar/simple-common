@@ -7,12 +7,12 @@ import com.mimu.common.util.RpcResult;
 import com.mimu.common.util.RpcResultUtil;
 import org.apache.dubbo.config.annotation.DubboService;
 
-@DubboService(interfaceClass = CalculateEchoService.class)
+@DubboService
 public class CalculateEchoServiceImpl implements CalculateEchoService {
     @Override
     public RpcResult<CalculateEchoResponse> echo(CalculateEchoRequest request) {
         CalculateEchoResponse response = new CalculateEchoResponse();
-        response.setResult(response.getResult());
+        response.setResult(request.getResult());
         response.setMessage("receive your request");
         return RpcResultUtil.success(response);
     }

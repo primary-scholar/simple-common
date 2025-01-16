@@ -16,7 +16,8 @@ public class CalculateConsumerApplicationConfig {
     @Bean
     public ApplicationConfig applicationConfig() {
         ApplicationConfig applicationConfig = new ApplicationConfig();
-        applicationConfig.setName("calculateApplicationConfig");
+        applicationConfig.setName("calculate-consumer-application");
+        applicationConfig.setQosEnable(Boolean.FALSE);
         return applicationConfig;
     }
 
@@ -34,7 +35,7 @@ public class CalculateConsumerApplicationConfig {
         protocolConfig.setName("dubbo");
         protocolConfig.setPort(20880);
         protocolConfig.setThreads(10);
-        protocolConfig.setDispatcher("dispatcher");
+        protocolConfig.setDispatcher("message");
         return protocolConfig;
     }
 

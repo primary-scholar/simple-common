@@ -1,24 +1,23 @@
 package com.mimu.common.log.dubbo.provider.test.config;
 
-import com.mimu.common.log.dubbo.test.api.CalculateEchoService;
+import com.mimu.common.log.dubbo.provider.test.service.CalculateEchoServiceImpl;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.ProviderConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
-import org.apache.dubbo.config.spring.context.annotation.EnableDubboConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableDubbo(scanBasePackageClasses = CalculateEchoService.class)
-@EnableDubboConfig
+@EnableDubbo(scanBasePackageClasses = CalculateEchoServiceImpl.class)
 public class CalculateProviderApplicationConfig {
 
     @Bean
     public ApplicationConfig applicationConfig() {
         ApplicationConfig applicationConfig = new ApplicationConfig();
-        applicationConfig.setName("calculateApplicationConfig");
+        applicationConfig.setName("calculate-provider-application");
+        applicationConfig.setQosEnable(Boolean.FALSE);
         return applicationConfig;
     }
 
@@ -36,7 +35,7 @@ public class CalculateProviderApplicationConfig {
         protocolConfig.setName("dubbo");
         protocolConfig.setPort(20880);
         protocolConfig.setThreads(10);
-        protocolConfig.setDispatcher("dispatcher");
+        protocolConfig.setDispatcher("message");
         return protocolConfig;
     }
 
@@ -44,6 +43,7 @@ public class CalculateProviderApplicationConfig {
     public ProviderConfig providerConfig() {
         ProviderConfig providerConfig = new ProviderConfig();
         providerConfig.setRegistry(registryConfig());
+        providerConfig.setRegister(Boolean.TRUE);
         providerConfig.setTimeout(3000);
         return providerConfig;
     }
