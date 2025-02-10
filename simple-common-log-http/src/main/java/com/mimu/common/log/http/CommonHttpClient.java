@@ -169,6 +169,8 @@ public class CommonHttpClient {
         if (slashIndex > NumberUtils.INTEGER_MINUS_ONE) {
             if (questionIndex > NumberUtils.INTEGER_MINUS_ONE) {
                 path = path.substring(slashIndex + HttpNounConstant.SLASH.length(), questionIndex);
+            } else {
+                path = path.substring(slashIndex + HttpNounConstant.SLASH.length());
             }
         }
         return path;
