@@ -3,7 +3,7 @@
     <Properties>
         <!--<Property name="path">${sys:server_log_home}</Property>
         <Property name="name">${sys:server_name}</Property>-->
-        <Property name="path">logs</Property>
+        <Property name="path">consumer-logs</Property>
         <Property name="name">simple-common-log-dubbo-consumer-test</Property>
     </Properties>
 

@@ -74,6 +74,7 @@ public class TraceContext {
         fillLogMdcInfo();
     }
 
+    // todo 确定这里 是否需要 fillMdc
     public TraceSpan createLocalSpan(String operationName) {
         TraceSpan localSpan;
         TraceSpan parentSpan = peek();

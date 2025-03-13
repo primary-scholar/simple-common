@@ -1,6 +1,7 @@
 package com.mimu.common.log.dubbo.provider.test.config;
 
 import com.mimu.common.log.dubbo.provider.test.service.CalculateEchoServiceImpl;
+import com.mimu.common.log.springmvc.config.LogTraceConfig;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.ProviderConfig;
@@ -8,8 +9,10 @@ import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import(LogTraceConfig.class)
 @EnableDubbo(scanBasePackageClasses = CalculateEchoServiceImpl.class)
 public class CalculateProviderApplicationConfig {
 

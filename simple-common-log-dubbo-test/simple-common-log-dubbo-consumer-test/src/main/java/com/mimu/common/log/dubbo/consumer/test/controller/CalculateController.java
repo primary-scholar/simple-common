@@ -1,7 +1,9 @@
 package com.mimu.common.log.dubbo.consumer.test.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.mimu.common.log.dubbo.consumer.test.service.CalculateConsumerService;
+import com.mimu.common.log.dubbo.test.api.vo.CalculateAnotherEchoRequest;
 import com.mimu.common.log.dubbo.test.api.vo.CalculateEchoRequest;
 import com.mimu.common.log.dubbo.test.api.vo.CalculateEchoResponse;
 import org.slf4j.Logger;
@@ -24,6 +26,15 @@ public class CalculateController {
     public CalculateEchoResponse echo(CalculateEchoRequest request) {
         logger.info("request:{}", JSONObject.toJSONString(request));
         CalculateEchoResponse response = calculateConsumerService.echoResponse();
+        return response;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/api/num/dubbo/echo/get/ugly", method = RequestMethod.GET)
+    public CalculateEchoResponse echoAnoterh(CalculateAnotherEchoRequest request) {
+        logger.info("request:{}", JSONObject.toJSONString(request));
+        CalculateEchoResponse response = calculateConsumerService.echoResponseAnother(request.getId(), request.getDesc()
+                , JSONObject.parseObject(JSONObject.toJSONString(request)), new JSONArray());
         return response;
     }
 }
