@@ -14,8 +14,8 @@ public class ProviderTraceFilter extends AbstractTraceFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         TraceContextCarrier traceContextCarrier = new TraceContextCarrier();
-        TraceSpan entrySpan = TraceContextManager.createEntrySpan(StringUtils.EMPTY, traceContextCarrier);
         fillCarrier(invocation, traceContextCarrier);
+        TraceSpan entrySpan = TraceContextManager.createEntrySpan(StringUtils.EMPTY, traceContextCarrier);
         fillSpanTag(invocation, entrySpan);
         Result result = null;
         try {
