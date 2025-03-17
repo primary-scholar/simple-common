@@ -1,5 +1,6 @@
 package com.mimu.common.log.dubbo;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.mimu.common.constants.NounConstant;
 import com.mimu.common.trace.context.TraceContextCarrier;
@@ -10,8 +11,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Result;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class AbstractTraceFilter {
 
@@ -57,7 +57,6 @@ public class AbstractTraceFilter {
     public void fillSpanTag(Invocation invocation, TraceSpan span) {
         Map<String, String> tags = span.getTags();
         Class<?> anInterface = invocation.getInvoker().getInterface();
-        Object[] arguments = invocation.getArguments();
         if (StringUtils.isEmpty(tags.get(NounConstant.URI))) {
             span.addTag(NounConstant.URI, anInterface.getCanonicalName());
         }
@@ -65,7 +64,7 @@ public class AbstractTraceFilter {
             span.addTag(NounConstant.QUERY, anInterface.getCanonicalName());
         }
         if (StringUtils.isEmpty(tags.get(NounConstant.REQUEST))) {
-            span.addTag(NounConstant.REQUEST, "");
+            span.addTag(NounConstant.REQUEST, getRpcParam(invocation));
         }
         String tagCid = tags.get(NounConstant.CID);
         if (StringUtils.isEmpty(tagCid) || NumberUtils.toLong(tagCid) <= NumberUtils.LONG_ZERO) {
@@ -83,6 +82,26 @@ public class AbstractTraceFilter {
         if (StringUtils.isEmpty(tags.get(NounConstant.RESPONSE))) {
             span.addTag(NounConstant.RESPONSE, returnValue);
         }
+    }
+
+    private String getRpcParam(Invocation invocation) {
+        if (Objects.isNull(invocation) || Objects.isNull(invocation.getArguments())) {
+            return JSONObject.toJSONString(Collections.emptyList());
+        }
+        Object[] arguments = invocation.getArguments();
+        ArrayList<String> param = new ArrayList<>(arguments.length);
+        for (Object argument : arguments) {
+            if (argument instanceof String) {
+                param.add((String) argument);
+            } else if (argument instanceof JSONObject) {
+                param.add((((JSONObject) argument)).toJSONString());
+            } else if (argument instanceof JSONArray) {
+                param.add(((JSONArray) argument).toJSONString());
+            } else {
+                param.add(JSONObject.toJSONString(argument));
+            }
+        }
+        return param.toString();
     }
 
 
