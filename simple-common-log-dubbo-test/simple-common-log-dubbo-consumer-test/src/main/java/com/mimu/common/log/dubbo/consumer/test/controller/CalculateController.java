@@ -31,7 +31,7 @@ public class CalculateController {
 
     @ResponseBody
     @RequestMapping(value = "/api/num/dubbo/echo/get/ugly", method = RequestMethod.GET)
-    public CalculateEchoResponse echoAnoterh(CalculateAnotherEchoRequest request) {
+    public CalculateEchoResponse echoAnother(CalculateAnotherEchoRequest request) {
         logger.info("request:{}", JSONObject.toJSONString(request));
         CalculateEchoResponse response = calculateConsumerService.echoResponseAnother(request.getId(), request.getDesc()
                 , JSONObject.parseObject(JSONObject.toJSONString(request)), new JSONArray());
